@@ -93,9 +93,8 @@ class ScriptScraper:
         if not os.path.exists(self.download_directory + '/' + tv_show_title + '_' + tv_show_date + '/' + season_div.find('h3').get_text()):
           os.mkdir(self.download_directory + '/' + tv_show_title + '_' + tv_show_date + '/' + season_div.find('h3').get_text())
         ep_filename = episode_link.get_text()+ '.txt'
-        with open(self.download_directory + '/' + ep_path + '/' + ep_filename, 'w+') as handle:
-          handle.write(clean_script)
-          handle.close()
+
+        self.save_script_file(ep_path + '/' + ep_filename, clean_script)
   
   def scrape_movie_scripts(self, movie_title, movie_date, movie_script_page_url):
     movie_script_page = urlopen(self.site_url + movie_script_page_url)
@@ -106,12 +105,15 @@ class ScriptScraper:
 
     # TODO: validate file path and name
     movie_filename = movie_title + '_' + str(movie_date) + '.txt'
-    with open(self.download_directory + '/' + movie_filename, 'w+') as handle:
-      handle.write(clean_script)
-      handle.close()
+    self.save_script_file(movie_filename, clean_script)
   
   def clean_script(self, raw_script):
     # TODO: define and implement cleaning procedure
     clean_script = (raw_script + '.')[:-1]
     clean_script = clean_script.strip()
     return clean_script
+  
+  def save_script_file(self, file_name, script):
+    with open('/'.join([self.download_directory, file_name]), 'w+') as handle:
+      handle.write(script)
+      handle.close()
