@@ -110,7 +110,8 @@ class ScriptScraper:
   def clean_title(self, raw_title):
     clean_title = (raw_title + '.')[:-1]
     clean_title = clean_title.strip()
-    clean_title = clean_title.replace('/', '<<FS>>')
+    clean_title = clean_title.replace('/', '<<SLASH>>')
+    clean_title = clean_title.replace(':', '<<COLON>>')
     return clean_title
   
   def clean_script(self, raw_script):
