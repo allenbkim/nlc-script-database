@@ -58,7 +58,7 @@ class ScriptScraper:
         dates = re.findall(r'[(][\d]{4,4}[)]', title)
         if len(dates) > 0:
           # If a date in the format (####) exists then take the last one and remove from the title
-          title_date = dates[-1]
+          title_date = dates[-1][1:-1]
           title = title[:-7]
         else:
           # Make note of the title without a date on "Springfield, Springfield"
