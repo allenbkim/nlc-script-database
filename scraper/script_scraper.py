@@ -86,13 +86,14 @@ class ScriptScraper:
         raw_script = episode_script_page_soup.find('div', class_='scrolling-script-container').get_text()
         clean_script = self.clean_script(raw_script)
 
-        # TODO: validate file path and name
-        ep_path = '/'.join([tv_show_title + '_' + tv_show_date, season_div.find('h3').get_text()])
-        if not os.path.exists(self.download_directory + '/' + tv_show_title + '_' + tv_show_date):
-          os.mkdir(self.download_directory + '/' + tv_show_title + '_' + tv_show_date)
-        if not os.path.exists(self.download_directory + '/' + tv_show_title + '_' + tv_show_date + '/' + season_div.find('h3').get_text()):
-          os.mkdir(self.download_directory + '/' + tv_show_title + '_' + tv_show_date + '/' + season_div.find('h3').get_text())
-        ep_filename = episode_link.get_text()+ '.txt'
+        # TODO: Clean up logic to ensure file path
+        clean_title = self.clean_title(tv_show_title)
+        ep_path = '/'.join([clean_title + '_' + tv_show_date, season_div.find('h3').get_text()])
+        if not os.path.exists(self.download_directory + '/' + clean_title + '_' + tv_show_date):
+          os.mkdir(self.download_directory + '/' + clean_title + '_' + tv_show_date)
+        if not os.path.exists(self.download_directory + '/' + clean_title + '_' + tv_show_date + '/' + season_div.find('h3').get_text()):
+          os.mkdir(self.download_directory + '/' + clean_title + '_' + tv_show_date + '/' + season_div.find('h3').get_text())
+        ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
 
         self.save_script_file(ep_path + '/' + ep_filename, clean_script)
   
@@ -103,9 +104,14 @@ class ScriptScraper:
     raw_script = movie_script_soup.find('div', class_='scrolling-script-container').get_text()
     clean_script = self.clean_script(raw_script)
 
-    # TODO: validate file path and name
-    movie_filename = movie_title + '_' + str(movie_date) + '.txt'
+    movie_filename = self.clean_title(movie_title) + '_' + str(movie_date) + '.txt'
     self.save_script_file(movie_filename, clean_script)
+  
+  def clean_title(self, raw_title):
+    clean_title = (raw_title + '.')[:-1]
+    clean_title = clean_title.strip()
+    clean_title = clean_title.replace('/', '<<FS>>')
+    return clean_title
   
   def clean_script(self, raw_script):
     # TODO: define and implement cleaning procedure
