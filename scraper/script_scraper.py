@@ -54,7 +54,7 @@ class ScriptScraper:
       for title_link in title_links:
         title_page = title_link['href']
         title = title_link.get_text()
-        title_date = '==MISSING_DATE=='
+        title_date = '<<DATE>>'
         dates = re.findall(r'[(][\d]{4,4}[)]', title)
         if len(dates) > 0:
           # If a date in the format (####) exists then take the last one and remove from the title
