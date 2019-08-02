@@ -35,7 +35,7 @@ class ScriptScraper:
   def iterate_title_letters(self, letter):
     # Soupify the script page for each letter
     letter_page = urlopen(self.scripts_url + '?order=' + letter)
-    letter_page_soup = BeautifulSoup(letter_page, 'html.parser')
+    letter_page_soup = BeautifulSoup(letter_page, 'lxml')
 
     # Find the number of pages for each letter
     letter_page_links = letter_page_soup.select('div.pagination a')
@@ -48,7 +48,7 @@ class ScriptScraper:
     while current_page <= letter_pages:
       if current_page > 1:
         letter_page = urlopen(self.scripts_url + '?order=' + letter + '&page=' + str(current_page))
-        letter_page_soup = BeautifulSoup(letter_page, 'html.parser')
+        letter_page_soup = BeautifulSoup(letter_page, 'lxml')
       
       title_links = letter_page_soup.select('a.script-list-item')
       for title_link in title_links:
@@ -73,7 +73,7 @@ class ScriptScraper:
   
   def scrape_tv_scripts(self, tv_show_title, tv_show_date, tv_episodes_page_url):
     tv_episodes_page = urlopen(self.site_url + tv_episodes_page_url)
-    tv_episodes_page_soup = BeautifulSoup(tv_episodes_page, 'html.parser')
+    tv_episodes_page_soup = BeautifulSoup(tv_episodes_page, 'lxml')
 
     season_divs = tv_episodes_page_soup.select('div.season-episodes')
     for season_div in season_divs:
@@ -81,7 +81,7 @@ class ScriptScraper:
       for episode_link in episode_links:
         episode_script_page_url = episode_link['href']
         episode_script_page = urlopen(self.site_url + '/' + episode_script_page_url)
-        episode_script_page_soup = BeautifulSoup(episode_script_page, 'html.parser')
+        episode_script_page_soup = BeautifulSoup(episode_script_page, 'lxml')
 
         raw_script = episode_script_page_soup.find('div', class_='scrolling-script-container').get_text()
         clean_script = self.clean_script(raw_script)
@@ -99,7 +99,7 @@ class ScriptScraper:
   
   def scrape_movie_scripts(self, movie_title, movie_date, movie_script_page_url):
     movie_script_page = urlopen(self.site_url + movie_script_page_url)
-    movie_script_soup = BeautifulSoup(movie_script_page, 'html.parser')
+    movie_script_soup = BeautifulSoup(movie_script_page, 'lxml')
 
     raw_script = movie_script_soup.find('div', class_='scrolling-script-container').get_text()
     clean_script = self.clean_script(raw_script)
