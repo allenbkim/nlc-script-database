@@ -38,7 +38,11 @@ class ScriptScraper:
     letter_page_soup = BeautifulSoup(letter_page, 'html.parser')
 
     # Find the number of pages for each letter
-    letter_pages = int(letter_page_soup.select('div.pagination a')[-1].get_text())
+    letter_page_links = letter_page_soup.select('div.pagination a')
+    if len(letter_page_links) > 0:
+      letter_pages = int(letter_page_links[-1].get_text())
+    else:
+      letter_pages = 1
 
     current_page = 1
     while current_page <= letter_pages:
