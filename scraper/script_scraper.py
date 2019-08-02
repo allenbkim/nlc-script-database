@@ -1,14 +1,16 @@
 from bs4 import BeautifulSoup
 import os
 from urllib.request import urlopen
+from concurrent.futures import ThreadPoolExecutor
 import re
 
 class ScriptScraper:
-  def __init__(self, tv_scripts, letters, site_url, download_directory):
+  def __init__(self, tv_scripts, letters, site_url, thread_count, download_directory):
     self.tv_scripts = tv_scripts
     self.letters = letters
     self.site_url = site_url
     self.scripts_url = ''
+    self.thread_count = thread_count
     self.download_directory = download_directory
     self.missing_dates = []
   
@@ -21,8 +23,10 @@ class ScriptScraper:
     if not os.path.exists(self.download_directory):
       os.mkdir(self.download_directory)
     
-    for letter in self.letters:
-      self.iterate_title_letters(letter)
+    with ThreadPoolExecutor(self.thread_count) as executor:
+      results = executor.map(self.iterate_title_letters, self.letters)
+    #for letter in self.letters:
+    #  self.iterate_title_letters(letter)
   
   def iterate_title_letters(self, letter):
     # Soupify the script page for each letter

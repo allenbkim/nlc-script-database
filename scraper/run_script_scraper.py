@@ -1,10 +1,11 @@
 from script_scraper import ScriptScraper
 
-def run_script_scraper(tv_scripts, script_letters, site_url, download_directory):
+def run_script_scraper(tv_scripts, script_letters, site_url, thread_count, download_directory):
   # Initialize the "Springfield, Springfield" screen scraper
   scraper = ScriptScraper(tv_scripts,
                           script_letters,
                           site_url,
+                          thread_count,
                           download_directory
                          )
 
@@ -17,7 +18,8 @@ if __name__ == '__main__':
                     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
                     'V', 'W', 'X', 'Y', 'Z']
   site_url = 'https://www.springfieldspringfield.co.uk'
+  thread_count = 4
   download_directory = 'test'
 
   # Engage!
-  run_script_scraper(tv_scripts, script_letters, site_url, download_directory)
+  run_script_scraper(tv_scripts, script_letters, site_url, thread_count, download_directory)
