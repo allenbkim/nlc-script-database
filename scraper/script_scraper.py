@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import os
 from urllib.request import urlopen
 from concurrent.futures import ThreadPoolExecutor
+from time import time
 import re
 
 class ScriptScraper:
@@ -15,6 +16,8 @@ class ScriptScraper:
     self.missing_dates = []
   
   def scrape_site(self):
+    start_time = time()
+
     if self.tv_scripts:
       self.scripts_url = self.site_url + '/tv_show_episode_scripts.php'
     else:
@@ -25,8 +28,9 @@ class ScriptScraper:
     
     with ThreadPoolExecutor(self.thread_count) as executor:
       results = executor.map(self.iterate_title_letters, self.letters)
-    #for letter in self.letters:
-    #  self.iterate_title_letters(letter)
+    
+    total_time = time() - start_time
+    print('Total time:', str(total_time))
   
   def iterate_title_letters(self, letter):
     # Soupify the script page for each letter
