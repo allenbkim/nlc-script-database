@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import os
 from urllib.request import urlopen
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
 import re
 
@@ -13,7 +13,6 @@ class ScriptScraper:
     self.scripts_url = ''
     self.thread_count = thread_count
     self.download_directory = download_directory
-    self.missing_dates = []
   
   def scrape_site(self):
     start_time = time()
@@ -27,12 +26,16 @@ class ScriptScraper:
       os.mkdir(self.download_directory)
     
     with ThreadPoolExecutor(self.thread_count) as executor:
-      results = executor.map(self.iterate_title_letters, self.letters)
+      letter_results = {executor.submit(self.iterate_title_letters, letter): letter for letter in self.letters}
+    for letter_result in as_completed(letter_results):
+      print(letter_result)
     
     total_time = time() - start_time
     print('Total time:', str(total_time))
   
   def iterate_title_letters(self, letter):
+    missing_dates = []
+
     # Soupify the script page for each letter
     letter_page = urlopen(self.scripts_url + '?order=' + letter)
     letter_page_soup = BeautifulSoup(letter_page, 'lxml')
@@ -62,7 +65,7 @@ class ScriptScraper:
           title = title[:-7]
         else:
           # Make note of the title without a date on "Springfield, Springfield"
-          self.missing_dates.append(title)
+          missing_dates.append(title)
         
         if self.tv_scripts:
           self.scrape_tv_scripts(title, title_date, title_page)
@@ -70,6 +73,8 @@ class ScriptScraper:
           self.scrape_movie_scripts(title, title_date, title_page)
 
       current_page += 1
+  
+    return missing_dates
   
   def scrape_tv_scripts(self, tv_show_title, tv_show_date, tv_episodes_page_url):
     tv_episodes_page = urlopen(self.site_url + tv_episodes_page_url)
