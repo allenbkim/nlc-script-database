@@ -3,3 +3,6 @@ __pycache__/
 
 # Mac OS
 .DS_Store
+
+# Logging
+.log
