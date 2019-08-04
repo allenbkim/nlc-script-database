@@ -33,8 +33,7 @@ class ScriptScraper:
     else:
       self.scripts_url = self.site_url + '/movie_scripts.php'
 
-    if not os.path.exists(self.download_directory):
-      os.mkdir(self.download_directory)
+    self.ensure_script_file_path(self.download_directory.split('/'))
     
     with ThreadPoolExecutor(self.thread_count) as executor:
       letter_results = {executor.submit(self.iterate_title_letter, letter): letter for letter in self.letters}
@@ -111,7 +110,8 @@ class ScriptScraper:
         clean_script = self.clean_script(raw_script)
 
         clean_title = self.clean_title(tv_show_title)
-        path_elements = [clean_title + '_' + tv_show_date, season_div.find('h3').get_text()]
+        path_elements = self.download_directory.split('/') + \
+                        [clean_title + '_' + tv_show_date, season_div.find('h3').get_text()]
         self.ensure_script_file_path(path_elements)
         ep_path = '/'.join(path_elements)
         ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
@@ -126,7 +126,7 @@ class ScriptScraper:
     clean_script = self.clean_script(raw_script)
 
     movie_filename = self.clean_title(movie_title) + '_' + str(movie_date) + '.txt'
-    self.save_script_file(movie_filename, clean_script)
+    self.save_script_file('/'.join([self.download_directory, movie_filename]), clean_script)
   
   def clean_title(self, raw_title):
     clean_title = (raw_title + '.')[:-1]
@@ -142,13 +142,16 @@ class ScriptScraper:
   
   def ensure_script_file_path(self, path_elements):
     if path_elements is not None and len(path_elements) > 0:
-      current_path = self.download_directory
+      current_path = ''
       for path_element in path_elements:
-        current_path = '/'.join([current_path, path_element])
+        if current_path == '':
+          current_path = path_element
+        else:
+          current_path = '/'.join([current_path, path_element])
         if not os.path.exists(current_path):
           os.mkdir(current_path)
   
   def save_script_file(self, file_name, script):
-    with open('/'.join([self.download_directory, file_name]), 'w+') as handle:
+    with open(file_name, 'w+') as handle:
       handle.write(script)
       handle.close()
