@@ -96,16 +96,13 @@ class ScriptScraper:
         raw_script = episode_script_page_soup.find('div', class_='scrolling-script-container').get_text()
         clean_script = self.clean_script(raw_script)
 
-        # TODO: Clean up logic to ensure file path
         clean_title = self.clean_title(tv_show_title)
-        ep_path = '/'.join([clean_title + '_' + tv_show_date, season_div.find('h3').get_text()])
-        if not os.path.exists(self.download_directory + '/' + clean_title + '_' + tv_show_date):
-          os.mkdir(self.download_directory + '/' + clean_title + '_' + tv_show_date)
-        if not os.path.exists(self.download_directory + '/' + clean_title + '_' + tv_show_date + '/' + season_div.find('h3').get_text()):
-          os.mkdir(self.download_directory + '/' + clean_title + '_' + tv_show_date + '/' + season_div.find('h3').get_text())
+        path_elements = [clean_title + '_' + tv_show_date, season_div.find('h3').get_text()]
+        self.ensure_script_file_path(path_elements)
+        ep_path = '/'.join(path_elements)
         ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
 
-        self.save_script_file(ep_path + '/' + ep_filename, clean_script)
+        self.save_script_file('/'.join([ep_path, ep_filename]), clean_script)
   
   def scrape_movie_scripts(self, movie_title, movie_date, movie_script_page_url):
     movie_script_page = urlopen(self.site_url + movie_script_page_url)
@@ -127,6 +124,14 @@ class ScriptScraper:
   def clean_script(self, raw_script):
     clean_script = re.sub(r'\s+', ' ', raw_script).strip()
     return clean_script
+  
+  def ensure_script_file_path(self, path_elements):
+    if path_elements is not None and len(path_elements) > 0:
+      current_path = self.download_directory
+      for path_element in path_elements:
+        current_path = '/'.join([current_path, path_element])
+        if not os.path.exists(current_path):
+          os.mkdir(current_path)
   
   def save_script_file(self, file_name, script):
     with open('/'.join([self.download_directory, file_name]), 'w+') as handle:
