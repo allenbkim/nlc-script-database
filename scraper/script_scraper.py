@@ -28,7 +28,11 @@ class ScriptScraper:
     with ThreadPoolExecutor(self.thread_count) as executor:
       letter_results = {executor.submit(self.iterate_title_letters, letter): letter for letter in self.letters}
     for letter_result in as_completed(letter_results):
-      print(letter_result)
+      try:
+        letter = letter_results[letter_result]
+        print('Missing for', letter, '-', str(letter_result.result()))
+      except:
+        print('Error occurred for', letter)
     
     total_time = time() - start_time
     print('Total time:', str(total_time))
