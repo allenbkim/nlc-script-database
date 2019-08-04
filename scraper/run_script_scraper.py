@@ -10,7 +10,15 @@ def run_script_scraper(tv_scripts, script_letters, site_url, thread_count, downl
                           download_directory
                          )
 
+  print('Starting script scraping procedure:\n\tTV:{tv}\n\tLetters:{letters}'
+          .format(
+            tv=str(tv_scripts), 
+            letters=str(script_letters)
+          )
+        )
   scraper.scrape_site()
+  print('Script scraping procedure completed. Check log for details.')
+
 
 if __name__ == '__main__':
   # Parameters for scraping scripts from "Springfield, Springfield" site
