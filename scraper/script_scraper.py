@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import time
 import re
 
+
 class ScriptScraper:
   def __init__(self, tv_scripts, letters, site_url, thread_count, download_directory):
     self.tv_scripts = tv_scripts
