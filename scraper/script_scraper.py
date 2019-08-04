@@ -37,7 +37,7 @@ class ScriptScraper:
       os.mkdir(self.download_directory)
     
     with ThreadPoolExecutor(self.thread_count) as executor:
-      letter_results = {executor.submit(self.iterate_title_letters, letter): letter for letter in self.letters}
+      letter_results = {executor.submit(self.iterate_title_letter, letter): letter for letter in self.letters}
     for letter_result in as_completed(letter_results):
       try:
         letter = letter_results[letter_result]
@@ -48,9 +48,7 @@ class ScriptScraper:
     total_time = time() - start_time
     logging.info('Total time: ' + str(total_time))
   
-  def iterate_title_letters(self, letter):
-    missing_dates = []
-
+  def iterate_title_letter(self, letter):
     # Soupify the script page for each letter
     letter_page = urlopen(self.scripts_url + '?order=' + letter)
     letter_page_soup = BeautifulSoup(letter_page, 'lxml')
@@ -62,8 +60,14 @@ class ScriptScraper:
     else:
       letter_pages = 1
 
+    missing_dates = self.iterate_letter_pages(letter, letter_pages, letter_page_soup)  
+    return missing_dates
+  
+  def iterate_letter_pages(self, letter, num_pages, letter_page_soup):
+    missing_dates = []
     current_page = 1
-    while current_page <= letter_pages:
+
+    while current_page <= num_pages:
       if current_page > 1:
         letter_page = urlopen(self.scripts_url + '?order=' + letter + '&page=' + str(current_page))
         letter_page_soup = BeautifulSoup(letter_page, 'lxml')
@@ -88,7 +92,7 @@ class ScriptScraper:
           self.scrape_movie_scripts(title, title_date, title_page)
 
       current_page += 1
-  
+    
     return missing_dates
   
   def scrape_tv_scripts(self, tv_show_title, tv_show_date, tv_episodes_page_url):
