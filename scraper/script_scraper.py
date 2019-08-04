@@ -2,8 +2,9 @@ from bs4 import BeautifulSoup
 import os
 from urllib.request import urlopen
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from time import time
+from time import strftime, time
 import re
+import logging
 
 
 class ScriptScraper:
@@ -14,8 +15,17 @@ class ScriptScraper:
     self.scripts_url = ''
     self.thread_count = thread_count
     self.download_directory = download_directory
+    self.log_file = 'scriptscraper_{time}.log'.format(time=strftime('%Y-%m-%d %H:%M:%s'))
+
+    logging.basicConfig(filename=self.log_file, format='%(levelname)s: %(message)s', level=logging.DEBUG)
   
   def scrape_site(self):
+    logging.info('Starting scraping process:\n\tTV:{tv}\n\tLetters:{letters}'
+                  .format(
+                    tv=str(self.tv_scripts),
+                    letters=str(self.letters)
+                  )
+                )
     start_time = time()
 
     if self.tv_scripts:
@@ -31,12 +41,12 @@ class ScriptScraper:
     for letter_result in as_completed(letter_results):
       try:
         letter = letter_results[letter_result]
-        print('Missing for', letter, '-', str(letter_result.result()))
+        logging.info('Missing for ' + letter + ' - ' + str(letter_result.result()))
       except:
-        print('Error occurred for', letter)
+        logging.error('Error occurred for ' + letter)
     
     total_time = time() - start_time
-    print('Total time:', str(total_time))
+    logging.info('Total time: ' + str(total_time))
   
   def iterate_title_letters(self, letter):
     missing_dates = []
