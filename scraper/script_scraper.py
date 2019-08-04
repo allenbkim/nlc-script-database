@@ -133,6 +133,7 @@ class ScriptScraper:
   
   def clean_script(self, raw_script):
     clean_script = re.sub(r'\s+', ' ', raw_script).strip()
+    clean_script = clean_script.replace('\\', '')
     return clean_script
   
   def ensure_script_file_path(self, path_elements):
