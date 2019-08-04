@@ -124,9 +124,7 @@ class ScriptScraper:
     return clean_title
   
   def clean_script(self, raw_script):
-    # TODO: define and implement cleaning procedure
-    clean_script = (raw_script + '.')[:-1]
-    clean_script = clean_script.strip()
+    clean_script = re.sub(r'\s+', ' ', raw_script).strip()
     return clean_script
   
   def save_script_file(self, file_name, script):
