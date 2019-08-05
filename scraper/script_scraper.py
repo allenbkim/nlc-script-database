@@ -40,7 +40,11 @@ class ScriptScraper:
     for letter_result in as_completed(letter_results):
       try:
         letter = letter_results[letter_result]
-        logging.info('Missing for ' + letter + ' - ' + str(letter_result.result()))
+        script_count, show_count, missing_dates = letter_result.result()
+        if self.tv_scripts:
+          logging.info('Shows for {letter} - {count}'.format(letter=letter, count=show_count))
+        logging.info('Scripts for {letter} - {count}'.format(letter=letter, count=script_count))
+        logging.info('Missing for {letter} - {missing}'.format(letter=letter, missing=missing_dates))
       except:
         logging.error('Error occurred for ' + letter)
     
@@ -59,12 +63,14 @@ class ScriptScraper:
     else:
       letter_pages = 1
 
-    missing_dates = self.iterate_letter_pages(letter, letter_pages, letter_page_soup)  
-    return missing_dates
+    script_count, show_count, missing_dates = self.iterate_letter_pages(letter, letter_pages, letter_page_soup)  
+    return script_count, show_count, missing_dates
   
   def iterate_letter_pages(self, letter, num_pages, letter_page_soup):
     missing_dates = []
     current_page = 1
+    show_count = 0
+    script_count = 0
 
     while current_page <= num_pages:
       if current_page > 1:
@@ -86,15 +92,20 @@ class ScriptScraper:
           missing_dates.append(title)
         
         if self.tv_scripts:
-          self.scrape_tv_scripts(title, title_date, title_page)
+          added_scripts = self.scrape_tv_scripts(title, title_date, title_page)
+          script_count += added_scripts
         else:
           self.scrape_movie_scripts(title, title_date, title_page)
-
+          script_count += 1
+        
+        show_count += 1
+        
       current_page += 1
     
-    return missing_dates
+    return script_count, show_count, missing_dates
   
   def scrape_tv_scripts(self, tv_show_title, tv_show_date, tv_episodes_page_url):
+    script_count = 0
     tv_episodes_page = urlopen(self.site_url + tv_episodes_page_url)
     tv_episodes_page_soup = BeautifulSoup(tv_episodes_page, 'lxml')
 
@@ -117,6 +128,9 @@ class ScriptScraper:
         ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
 
         self.save_script_file('/'.join([ep_path, ep_filename]), clean_script)
+        script_count += 1
+    
+    return script_count
   
   def scrape_movie_scripts(self, movie_title, movie_date, movie_script_page_url):
     movie_script_page = urlopen(self.site_url + movie_script_page_url)
