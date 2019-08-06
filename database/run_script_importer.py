@@ -12,7 +12,7 @@ if __name__ == '__main__':
   # Parameters for importing scripts into the postgres database
   movie_path = ''
   tv_path = ''
-  db_info = {}
+  db_info = { 'db_name': '', 'db_user': '', 'db_host': '', 'db_password': '' }
 
   # Engage!
   run_script_importer(movie_path, tv_path, db_info)
