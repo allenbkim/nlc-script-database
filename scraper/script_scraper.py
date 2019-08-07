@@ -45,8 +45,8 @@ class ScriptScraper:
           logging.info('Shows for {letter} - {count}'.format(letter=letter, count=show_count))
         logging.info('Scripts for {letter} - {count}'.format(letter=letter, count=script_count))
         logging.info('Missing for {letter} - {missing}'.format(letter=letter, missing=missing_dates))
-      except:
-        logging.error('Error occurred for ' + letter)
+      except Exception as e:
+        logging.error('Error occurred for ' + letter + ': ' + str(e))
     
     total_time = time() - start_time
     logging.info('Total time: ' + str(total_time))
