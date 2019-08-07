@@ -145,8 +145,14 @@ class ScriptScraper:
   def clean_title(self, raw_title):
     clean_title = (raw_title + '.')[:-1]
     clean_title = clean_title.strip()
-    clean_title = clean_title.replace('/', '<<SLASH>>')
-    clean_title = clean_title.replace(':', '<<COLON>>')
+    clean_title = clean_title.replace('\\', '__BSLASH__')
+    clean_title = clean_title.replace('/', '__SLASH__')
+    clean_title = clean_title.replace(':', '__COLON__')
+    clean_title = clean_title.replace('*', '__STAR__')
+    clean_title = clean_title.replace('<', '__LT__')
+    clean_title = clean_title.replace('>', '__GT__')
+    clean_title = clean_title.replace('?', '__Q__')
+    clean_title = clean_title.replace('|', '__PIPE__')
     return clean_title
   
   def clean_script(self, raw_script):
