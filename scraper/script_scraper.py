@@ -7,6 +7,9 @@ import re
 import logging
 
 
+ERROR_THRESHOLD = 5
+
+
 class ScriptScraper:
   def __init__(self, tv_scripts, letters, site_url, thread_count, download_directory):
     self.tv_scripts = tv_scripts
@@ -46,7 +49,7 @@ class ScriptScraper:
         logging.info('Scripts for {letter} - {count}'.format(letter=letter, count=script_count))
         logging.info('Missing for {letter} - {missing}'.format(letter=letter, missing=missing_dates))
       except Exception as e:
-        logging.error('Error occurred for ' + letter + ': ' + str(e))
+        logging.error('scrape_site(): Error occurred for ' + letter + ': ' + str(e))
     
     total_time = time() - start_time
     logging.info('Total time: ' + str(total_time))
@@ -71,80 +74,103 @@ class ScriptScraper:
     current_page = 1
     show_count = 0
     script_count = 0
+    error_count = 0
 
     while current_page <= num_pages:
-      if current_page > 1:
-        letter_page = urlopen(self.scripts_url + '?order=' + letter + '&page=' + str(current_page))
-        letter_page_soup = BeautifulSoup(letter_page, 'lxml')
-      
-      title_links = letter_page_soup.select('a.script-list-item')
-      for title_link in title_links:
-        title_page = title_link['href']
-        title = title_link.get_text()
-        title_date = '==DATE=='
-        dates = re.findall(r'[(][\d]{4,4}[)]', title)
-        if len(dates) > 0:
-          # If a date in the format (####) exists then take the last one and remove from the title
-          title_date = dates[-1][1:-1]
-          title = title[:-7]
-        else:
-          # Make note of the title without a date on "Springfield, Springfield"
-          missing_dates.append(title)
+      try:
+        if current_page > 1:
+          letter_page = urlopen(self.scripts_url + '?order=' + letter + '&page=' + str(current_page))
+          letter_page_soup = BeautifulSoup(letter_page, 'lxml')
         
-        if self.tv_scripts:
-          added_scripts = self.scrape_tv_scripts(letter, title, title_date, title_page)
-          script_count += added_scripts
-        else:
-          self.scrape_movie_scripts(letter, title, title_date, title_page)
-          script_count += 1
-        
-        show_count += 1
-        
-      current_page += 1
+        title_links = letter_page_soup.select('a.script-list-item')
+        for title_link in title_links:
+          title_page = title_link['href']
+          title = title_link.get_text()
+          title_date = '==DATE=='
+          dates = re.findall(r'[(][\d]{4,4}[)]', title)
+          if len(dates) > 0:
+            # If a date in the format (####) exists then take the last one and remove from the title
+            title_date = dates[-1][1:-1]
+            title = title[:-7]
+          else:
+            # Make note of the title without a date on "Springfield, Springfield"
+            missing_dates.append(title)
+          
+          if self.tv_scripts:
+            added_scripts = self.scrape_tv_scripts(letter, title, title_date, title_page)
+            script_count += added_scripts
+          else:
+            self.scrape_movie_scripts(letter, title, title_date, title_page)
+            script_count += 1
+          
+          show_count += 1
+          
+        current_page += 1
+      except Exception as e:
+        logging.error('iterate_letter_pages(): Error occurred for ' + letter + ' on page ' + str(current_page) + ': ' + str(e))
+        error_count += 1
+        if error_count > ERROR_THRESHOLD:
+          raise e
     
     return script_count, show_count, missing_dates
   
   def scrape_tv_scripts(self, letter, tv_show_title, tv_show_date, tv_episodes_page_url):
     script_count = 0
+    error_count = 0
+
     tv_episodes_page = urlopen(self.site_url + tv_episodes_page_url)
     tv_episodes_page_soup = BeautifulSoup(tv_episodes_page, 'lxml')
 
-    season_divs = tv_episodes_page_soup.select('div.season-episodes')
-    for season_div in season_divs:
-      episode_links = season_div.select('a.season-episode-title')
-      for episode_link in episode_links:
-        episode_script_page_url = episode_link['href']
-        episode_script_page = urlopen(self.site_url + '/' + episode_script_page_url)
-        episode_script_page_soup = BeautifulSoup(episode_script_page, 'lxml')
+    try:
+      season_divs = tv_episodes_page_soup.select('div.season-episodes')
+      for season_div in season_divs:
+        episode_links = season_div.select('a.season-episode-title')
+        for episode_link in episode_links:
+          episode_script_page_url = episode_link['href']
+          episode_script_page = urlopen(self.site_url + '/' + episode_script_page_url)
+          episode_script_page_soup = BeautifulSoup(episode_script_page, 'lxml')
 
-        raw_script = episode_script_page_soup.find('div', class_='scrolling-script-container').get_text()
-        clean_script = self.clean_script(raw_script)
+          raw_script = episode_script_page_soup.find('div', class_='scrolling-script-container').get_text()
+          clean_script = self.clean_script(raw_script)
 
-        clean_title = self.clean_title(tv_show_title)
-        path_elements = self.download_directory.split('/') + \
-                        [letter, clean_title + '_' + tv_show_date, season_div.find('h3').get_text()]
-        self.ensure_script_file_path(path_elements)
-        ep_path = '/'.join(path_elements)
-        ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
+          clean_title = self.clean_title(tv_show_title)
+          path_elements = self.download_directory.split('/') + \
+                          [letter, clean_title + '_' + tv_show_date, season_div.find('h3').get_text()]
+          self.ensure_script_file_path(path_elements)
+          ep_path = '/'.join(path_elements)
+          ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
 
-        self.save_script_file('/'.join([ep_path, ep_filename]), clean_script)
-        script_count += 1
+          self.save_script_file('/'.join([ep_path, ep_filename]), clean_script)
+          script_count += 1
+    except Exception as e:
+      logging.error('scrape_tv_scripts(): Error occurred for TV show ' + tv_show_title + ': ' + str(e))
+      error_count += 1
+      if error_count > ERROR_THRESHOLD:
+        raise e
     
     return script_count
   
   def scrape_movie_scripts(self, letter, movie_title, movie_date, movie_script_page_url):
-    movie_script_page = urlopen(self.site_url + movie_script_page_url)
-    movie_script_soup = BeautifulSoup(movie_script_page, 'lxml')
+    error_count = 0
 
-    raw_script = movie_script_soup.find('div', class_='scrolling-script-container').get_text()
-    clean_script = self.clean_script(raw_script)
+    try:
+      movie_script_page = urlopen(self.site_url + movie_script_page_url)
+      movie_script_soup = BeautifulSoup(movie_script_page, 'lxml')
 
-    path_elements = self.download_directory.split('/') + [letter]
-    self.ensure_script_file_path(path_elements)
-    movie_path = '/'.join(path_elements)
-    movie_filename = self.clean_title(movie_title) + '_' + str(movie_date) + '.txt'
+      raw_script = movie_script_soup.find('div', class_='scrolling-script-container').get_text()
+      clean_script = self.clean_script(raw_script)
 
-    self.save_script_file('/'.join([movie_path, movie_filename]), clean_script)
+      path_elements = self.download_directory.split('/') + [letter]
+      self.ensure_script_file_path(path_elements)
+      movie_path = '/'.join(path_elements)
+      movie_filename = self.clean_title(movie_title) + '_' + str(movie_date) + '.txt'
+
+      self.save_script_file('/'.join([movie_path, movie_filename]), clean_script)
+    except Exception as e:
+      logging.error('scrape_movie_scripts(): Error occurred for movie ' + movie_title + ': ' + str(e))
+      error_count += 1
+      if error_count > ERROR_THRESHOLD:
+        raise e
   
   def clean_title(self, raw_title):
     clean_title = (raw_title + '.')[:-1]
@@ -176,6 +202,9 @@ class ScriptScraper:
           os.mkdir(current_path)
   
   def save_script_file(self, file_name, script):
-    with open(file_name, 'w+') as handle:
-      handle.write(script)
-      handle.close()
+    if not os.path.isfile(file_name):
+      with open(file_name, 'w+') as handle:
+        handle.write(script)
+        handle.close()
+    else:
+      logging.info('save_script_file(): File exists so skipping save: ' + file_name)
