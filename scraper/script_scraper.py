@@ -15,7 +15,7 @@ class ScriptScraper:
     self.scripts_url = ''
     self.thread_count = thread_count
     self.download_directory = download_directory
-    self.log_file = 'scriptscraper_{time}.log'.format(time=strftime('%Y-%m-%d %H-%M-%s'))
+    self.log_file = 'scriptscraper_{time}.log'.format(time=strftime('%Y-%m-%d %H-%M'))
 
     logging.basicConfig(filename=self.log_file, format='%(levelname)s: %(message)s', level=logging.DEBUG)
   
