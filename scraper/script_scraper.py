@@ -92,10 +92,10 @@ class ScriptScraper:
           missing_dates.append(title)
         
         if self.tv_scripts:
-          added_scripts = self.scrape_tv_scripts(title, title_date, title_page)
+          added_scripts = self.scrape_tv_scripts(letter, title, title_date, title_page)
           script_count += added_scripts
         else:
-          self.scrape_movie_scripts(title, title_date, title_page)
+          self.scrape_movie_scripts(letter, title, title_date, title_page)
           script_count += 1
         
         show_count += 1
@@ -104,7 +104,7 @@ class ScriptScraper:
     
     return script_count, show_count, missing_dates
   
-  def scrape_tv_scripts(self, tv_show_title, tv_show_date, tv_episodes_page_url):
+  def scrape_tv_scripts(self, letter, tv_show_title, tv_show_date, tv_episodes_page_url):
     script_count = 0
     tv_episodes_page = urlopen(self.site_url + tv_episodes_page_url)
     tv_episodes_page_soup = BeautifulSoup(tv_episodes_page, 'lxml')
@@ -122,7 +122,7 @@ class ScriptScraper:
 
         clean_title = self.clean_title(tv_show_title)
         path_elements = self.download_directory.split('/') + \
-                        [clean_title + '_' + tv_show_date, season_div.find('h3').get_text()]
+                        [letter, clean_title + '_' + tv_show_date, season_div.find('h3').get_text()]
         self.ensure_script_file_path(path_elements)
         ep_path = '/'.join(path_elements)
         ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
@@ -132,15 +132,19 @@ class ScriptScraper:
     
     return script_count
   
-  def scrape_movie_scripts(self, movie_title, movie_date, movie_script_page_url):
+  def scrape_movie_scripts(self, letter, movie_title, movie_date, movie_script_page_url):
     movie_script_page = urlopen(self.site_url + movie_script_page_url)
     movie_script_soup = BeautifulSoup(movie_script_page, 'lxml')
 
     raw_script = movie_script_soup.find('div', class_='scrolling-script-container').get_text()
     clean_script = self.clean_script(raw_script)
 
+    path_elements = self.download_directory.split('/') + [letter]
+    self.ensure_script_file_path(path_elements)
+    movie_path = '/'.join(path_elements)
     movie_filename = self.clean_title(movie_title) + '_' + str(movie_date) + '.txt'
-    self.save_script_file('/'.join([self.download_directory, movie_filename]), clean_script)
+
+    self.save_script_file('/'.join([movie_path, movie_filename]), clean_script)
   
   def clean_title(self, raw_title):
     clean_title = (raw_title + '.')[:-1]
