@@ -87,8 +87,14 @@ class ScriptImporter:
   
   def replace_tokens(self, title):
     fixed_title = (title + '.')[:-1]
-    fixed_title = fixed_title.replace('<<SLASH>>', '/')
-    fixed_title = fixed_title.replace('<<COLON>>', ':')
+    fixed_title = fixed_title.replace('__BSLASH__', '\\')
+    fixed_title = fixed_title.replace('__SLASH__', '/')
+    fixed_title = fixed_title.replace('__COLON__', ':')
+    fixed_title = fixed_title.replace('__STAR__', '*')
+    fixed_title = fixed_title.replace('__LT__', '<')
+    fixed_title = fixed_title.replace('__GT__', '>')
+    fixed_title = fixed_title.replace('__Q__', '?')
+    fixed_title = fixed_title.replace('__PIPE__', '|')
 
     return fixed_title
   
