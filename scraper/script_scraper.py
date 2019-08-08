@@ -116,37 +116,47 @@ class ScriptScraper:
   
   def scrape_tv_scripts(self, letter, tv_show_title, tv_show_date, tv_episodes_page_url):
     script_count = 0
-    error_count = 0
+    season_error_count = 0
+    ep_error_count = 0
 
     tv_episodes_page = urlopen(self.site_url + tv_episodes_page_url)
     tv_episodes_page_soup = BeautifulSoup(tv_episodes_page, 'lxml')
 
+    season_divs = tv_episodes_page_soup.select('div.season-episodes')
     try:
-      season_divs = tv_episodes_page_soup.select('div.season-episodes')
       for season_div in season_divs:
-        episode_links = season_div.select('a.season-episode-title')
-        for episode_link in episode_links:
-          episode_script_page_url = episode_link['href']
-          episode_script_page = urlopen(self.site_url + '/' + episode_script_page_url)
-          episode_script_page_soup = BeautifulSoup(episode_script_page, 'lxml')
+        try:
+          episode_links = season_div.select('a.season-episode-title')
+          for episode_link in episode_links:
+            episode_script_page_url = episode_link['href']
+            episode_script_page = urlopen(self.site_url + '/' + episode_script_page_url)
+            episode_script_page_soup = BeautifulSoup(episode_script_page, 'lxml')
 
-          raw_script = episode_script_page_soup.find('div', class_='scrolling-script-container').get_text()
-          clean_script = self.clean_script(raw_script)
+            raw_script = episode_script_page_soup.find('div', class_='scrolling-script-container').get_text()
+            clean_script = self.clean_script(raw_script)
 
-          clean_title = self.clean_title(tv_show_title)
-          path_elements = self.download_directory.split('/') + \
-                          [letter, clean_title + '_' + tv_show_date, season_div.find('h3').get_text()]
-          self.ensure_script_file_path(path_elements)
-          ep_path = '/'.join(path_elements)
-          ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
+            clean_title = self.clean_title(tv_show_title)
+            season = season_div.find('h3').get_text()
+            path_elements = self.download_directory.split('/') + \
+                            [letter, clean_title + '_' + tv_show_date, season]
+            self.ensure_script_file_path(path_elements)
+            ep_path = '/'.join(path_elements)
+            ep_filename = self.clean_title(episode_link.get_text()) + '.txt'
 
-          self.save_script_file('/'.join([ep_path, ep_filename]), clean_script)
-          script_count += 1
+            self.save_script_file('/'.join([ep_path, ep_filename]), clean_script)
+            script_count += 1
+        except Exception as e:
+          logging.error('scrape_tv_scripts() eps loop: Error occurred for TV show ' + tv_show_title + ': ' + str(e))
+          ep_error_count += 1
+          if ep_error_count > ERROR_THRESHOLD:
+            logging.error('scrape_tv_scripts() eps loop: Too many errors for ' + tv_show_title + ': not downloaded')
+            raise e
     except Exception as e:
-      logging.error('scrape_tv_scripts(): Error occurred for TV show ' + tv_show_title + ': ' + str(e))
-      error_count += 1
-      if error_count > ERROR_THRESHOLD:
-        raise e
+      logging.error('scrape_tv_scripts() season loop: Error occurred for TV show ' + tv_show_title + ': ' + str(e))
+      season_error_count += 1
+      if season_error_count > ERROR_THRESHOLD:
+        logging.error('scrape_tv_scripts() season loop: Too many errors for ' + tv_show_title + ': skipping')
+
     
     return script_count
   
