@@ -214,7 +214,7 @@ class ScriptScraper:
   
   def save_script_file(self, file_name, script):
     if not os.path.isfile(file_name):
-      with open(file_name, 'w+') as handle:
+      with open(file_name, 'w+', encoding='utf-8') as handle:
         handle.write(script)
         handle.close()
     else:
