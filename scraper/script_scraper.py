@@ -8,11 +8,8 @@ import logging
 import scraper_constants
 
 
-ERROR_THRESHOLD = 5
-
-
 class ScriptScraper:
-  def __init__(self, tv_scripts, letters, site_url, thread_count, download_directory):
+  def __init__(self, tv_scripts, letters, site_url, thread_count, download_directory, error_threshold=5):
     self.tv_scripts = tv_scripts
     self.letters = letters
     self.site_url = site_url
@@ -20,6 +17,7 @@ class ScriptScraper:
     self.thread_count = thread_count
     self.download_directory = download_directory
     self.log_file = 'scriptscraper_{time}.log'.format(time=strftime('%Y-%m-%d %H-%M'))
+    self.ERROR_THRESHOLD = error_threshold
 
     logging.basicConfig(filename=self.log_file, format='%(levelname)s: %(message)s', level=logging.DEBUG)
   
@@ -110,7 +108,7 @@ class ScriptScraper:
       except Exception as e:
         logging.error('iterate_letter_pages(): Error occurred for ' + letter + ' on page ' + str(current_page) + ': ' + str(e))
         error_count += 1
-        if error_count > ERROR_THRESHOLD:
+        if error_count > self.ERROR_THRESHOLD:
           raise e
     
     return script_count, show_count, missing_dates
@@ -149,13 +147,13 @@ class ScriptScraper:
         except Exception as e:
           logging.error('scrape_tv_scripts() eps loop: Error occurred for TV show ' + tv_show_title + ': ' + str(e))
           ep_error_count += 1
-          if ep_error_count > ERROR_THRESHOLD:
+          if ep_error_count > self.ERROR_THRESHOLD:
             logging.error('scrape_tv_scripts() eps loop: Too many errors for ' + tv_show_title + ': not downloaded')
             raise e
     except Exception as e:
       logging.error('scrape_tv_scripts() season loop: Error occurred for TV show ' + tv_show_title + ': ' + str(e))
       season_error_count += 1
-      if season_error_count > ERROR_THRESHOLD:
+      if season_error_count > self.ERROR_THRESHOLD:
         logging.error('scrape_tv_scripts() season loop: Too many errors for ' + tv_show_title + ': skipping')
 
     
@@ -180,7 +178,7 @@ class ScriptScraper:
     except Exception as e:
       logging.error('scrape_movie_scripts(): Error occurred for movie ' + movie_title + ': ' + str(e))
       error_count += 1
-      if error_count > ERROR_THRESHOLD:
+      if error_count > self.ERROR_THRESHOLD:
         logging.error('scrape_move_scripts(): Too many errors for movie ' + movie_title + ': not downloaded')
         raise e
   
