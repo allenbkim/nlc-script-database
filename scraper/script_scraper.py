@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from time import strftime, time
 import re
 import logging
+import scraper_constants
 
 
 ERROR_THRESHOLD = 5
@@ -86,7 +87,7 @@ class ScriptScraper:
         for title_link in title_links:
           title_page = title_link['href']
           title = title_link.get_text()
-          title_date = '==DATE=='
+          title_date = scraper_constants.DATE_TOKEN
           dates = re.findall(r'[(][\d]{4,4}[)]', title)
           if len(dates) > 0:
             # If a date in the format (####) exists then take the last one and remove from the title
@@ -186,14 +187,14 @@ class ScriptScraper:
   def clean_title(self, raw_title):
     clean_title = (raw_title + '.')[:-1]
     clean_title = clean_title.strip()
-    clean_title = clean_title.replace('\\', '==BSLASH==')
-    clean_title = clean_title.replace('/', '==SLASH==')
-    clean_title = clean_title.replace(':', '==COLON==')
-    clean_title = clean_title.replace('*', '==STAR==')
-    clean_title = clean_title.replace('<', '==LT==')
-    clean_title = clean_title.replace('>', '==GT==')
-    clean_title = clean_title.replace('?', '==Q==')
-    clean_title = clean_title.replace('|', '==PIPE==')
+    clean_title = clean_title.replace('\\', scraper_constants.BACKSLASH)
+    clean_title = clean_title.replace('/', scraper_constants.SLASH)
+    clean_title = clean_title.replace(':', scraper_constants.COLON)
+    clean_title = clean_title.replace('*', scraper_constants.STAR)
+    clean_title = clean_title.replace('<', scraper_constants.LESS_THAN)
+    clean_title = clean_title.replace('>', scraper_constants.GREATER_THAN)
+    clean_title = clean_title.replace('?', scraper_constants.QUESTION_MARK)
+    clean_title = clean_title.replace('|', scraper_constants.PIPE)
     return clean_title
   
   def clean_script(self, raw_script):
