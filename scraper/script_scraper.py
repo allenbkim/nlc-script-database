@@ -180,6 +180,7 @@ class ScriptScraper:
       logging.error('scrape_movie_scripts(): Error occurred for movie ' + movie_title + ': ' + str(e))
       error_count += 1
       if error_count > ERROR_THRESHOLD:
+        logging.error('scrape_move_scripts(): Too many errors for movie ' + movie_title + ': not downloaded')
         raise e
   
   def clean_title(self, raw_title):
@@ -213,7 +214,7 @@ class ScriptScraper:
   
   def save_script_file(self, file_name, script):
     if not os.path.isfile(file_name):
-      with open(file_name, 'w+') as handle:
+      with open(file_name, 'w+', encoding='utf-8') as handle:
         handle.write(script)
         handle.close()
     else:
