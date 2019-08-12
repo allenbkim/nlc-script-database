@@ -41,7 +41,7 @@ class ScriptFileDateFixer():
     logging.info('Total time: ' + str(total_time))
 
   def update_script_dir(self, script_title, script_date):
-    clean_title = self.clean_title(script_title)
+    clean_title = scraper_constants.clean_script_title(script_title)
     script_letter = script_title[0]
     if script_letter.isalpha():
       search_dir = '/'.join([self.script_dir, script_letter])
@@ -59,15 +59,3 @@ class ScriptFileDateFixer():
         logging.error('No match found for ' + clean_title)
     else:
       raise ValueError('Search directory path not found: ' + search_dir)
-  
-  def clean_title(self, script_title):
-    clean_title = script_title.replace('\\', scraper_constants.BACKSLASH)
-    clean_title = clean_title.replace(':', scraper_constants.COLON)
-    clean_title = clean_title.replace('>', scraper_constants.GREATER_THAN)
-    clean_title = clean_title.replace('<', scraper_constants.LESS_THAN)
-    clean_title = clean_title.replace('|', scraper_constants.PIPE)
-    clean_title = clean_title.replace('?', scraper_constants.QUESTION_MARK)
-    clean_title = clean_title.replace('/', scraper_constants.SLASH)
-    clean_title = clean_title.replace('*', scraper_constants.STAR)
-
-    return clean_title
