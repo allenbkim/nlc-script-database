@@ -48,6 +48,8 @@ class PostgressImportCreator():
         for movie_file in movie_files:
           try:
             movie_title, movie_year = self.extract_movie_title_and_year_from_file_name(movie_file)
+            # Replace tokens with special characters
+            movie_title = scraper_constants.remake_script_title(movie_title)
             with open('/'.join([self.movie_dir, letter, movie_file]), 'r', encoding='ISO-8859-1') as movie_file_contents:
               movie_script = movie_file_contents.read()
             
@@ -102,6 +104,8 @@ class PostgressImportCreator():
                 for show_season_ep in show_season_eps:
                   try:
                     ep_number, ep_title = self.extract_tv_episode_number_and_title_from_file(show_season_ep)
+                    # Replace tokens with special characters
+                    ep_title = scraper_constants.remake_script_title(ep_title)
                     with open('/'.join([self.tv_dir, letter, show_dir, show_season_dir, show_season_ep]), 'r', encoding='ISO-8859-1') as ep_contents:
                       show_script = ep_contents.read()
                     
