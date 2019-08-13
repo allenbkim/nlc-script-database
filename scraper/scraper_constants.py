@@ -1,3 +1,6 @@
+import re
+
+
 BACKSLASH = '==BSLASH=='
 SLASH = '==SLASH=='
 COLON = '==COLON=='
@@ -12,7 +15,7 @@ DATE_TOKEN = '==DATE=='
 def clean_script_title(script_title):
   """Cleans up a TV/movie title to save it as a file name.
   """
-  clean_title = script_title.strip()
+  clean_title = re.sub(r'\s+', ' ', script_title).strip()
   clean_title = clean_title.replace('\\', BACKSLASH)
   clean_title = clean_title.replace('/', SLASH)
   clean_title = clean_title.replace(':', COLON)

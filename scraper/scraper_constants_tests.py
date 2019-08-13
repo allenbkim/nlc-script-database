@@ -3,7 +3,7 @@ import scraper_constants
 
 
 class ScraperConstantsTests(unittest.TestCase):
-  def test_clean_script_title(self):
+  def test_clean_script_title_replacements(self):
     # Arrange
     script_title = '\\/:*<>?|.txt'
     expected = ''.join([
@@ -17,6 +17,17 @@ class ScraperConstantsTests(unittest.TestCase):
                         scraper_constants.PIPE,
                         '.txt'
     ])
+
+    # Act
+    clean_title = scraper_constants.clean_script_title(script_title)
+
+    # Assert
+    self.assertEqual(clean_title, expected)
+  
+  def test_clean_script_title_whitespaces(self):
+    # Arrange
+    script_title = '1.\tWhy so many \ttabs .txt'
+    expected = '1. Why so many tabs .txt'
 
     # Act
     clean_title = scraper_constants.clean_script_title(script_title)
