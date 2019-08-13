@@ -7,7 +7,7 @@ def run_script_importer(import_files_dir, db_info):
     print('Starting script import process')
     script_importer.run_import_process()
     print('Finished script import process')
-  except Exception e:
+  except Exception as e:
     print('An error occurred during import process: {error}'.format(error=str(e)))
 
 
