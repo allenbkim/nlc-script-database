@@ -1,13 +1,15 @@
 import psycopg2
 from os import path, listdir
 from os.path import isfile, join
+import logging
+from time import time, strftime
 
 
 class ScriptImporter:
-  def __init__(self, movie_path, tv_path, db_info):
-    self.movie_path = movie_path
-    self.tv_path = tv_path
+  def __init__(self, import_files_dir, db_info):
+    self.import_files_dir = import_files_dir
     self.db_info = db_info
+    self.table_name = self.db_info['table_name']
     self.conn_str = "dbname='{db_name}' user='{db_user}' host='{db_host}' password='{db_password}'".format(
                     db_name=self.db_info['db_name'],
                     db_user=self.db_info['db_user'],
@@ -15,92 +17,45 @@ class ScriptImporter:
                     db_password=self.db_info['db_password']
                   ) 
     self.conn = None
+    self.log_file = 'scriptimporter_{time}.log'.format(time=strftime('%Y-%m-%d %H-%M'))
+
+    logging.basicConfig(filename=self.log_file, format='%(levelname)s: %(message)s', level=logging.DEBUG)
+    
   
-  def import_scripts(self):
+  def run_import_process(self):
+    """Connect to the database and kick off the script import process.
+    """
+    start_time = time()
+
     try:
-      self.conn = psycopg2.connect(self.conn_str)
-      self.conn.autocommit = True
+      logging.info('Starting import process')
+      self.connect_to_db()
     except:
       raise ValueError('Failed to connect to database with given information.')
 
-    self.import_movies()
-    self.import_tv_shows()
-
+    self.import_scripts()
     self.conn.close()
-  
-  def import_movies(self):
-    movie_dir_raw = listdir(self.movie_path)
-    movies = [movie for movie in movie_dir_raw if path.isfile(path.join(self.movie_path, movie))]
 
-    for movie in movies:
-      movie_title = self.replace_tokens(movie)
-      movie_year = self.get_year_from_file(movie)
-      if (movie_year > -1):
-        movie_script = self.get_script_file_contents(path.join(self.movie_path, movie))
-        # INSERT command
-      else:
-        print('Something wrong with movie year')
+    total_time = time() - start_time
+    logging.info('Import process completed in {time} sec.'.format(time=total_time))
   
-  def import_tv_shows(self):
-    tv_show_dir = listdir(self.tv_path)
-    tv_shows = [show for show in tv_show_dir if not path.isfile(path.join(self.tv_path, show))]
-
-    for tv_show in tv_shows:
-      year = self.get_year_from_file(tv_show)
-      seasons_dir = listdir(path.join(self.tv_path, tv_show))
-      seasons = [season for season in seasons_dir if not path.isfile(path.join(self.tv_path, tv_show, season))]
-
-      for season in seasons:
-        season_num = self.get_season_from_directory(season)
-        eps_dir = listdir(path.join(self.tv_path, tv_show, season))
-        eps = [ep for ep in eps_dir if path.isfile(path.join(self.tv_path, tv_show, season, ep))]
-
-        for ep in eps:
-          ep_num = self.get_episode_from_file(ep)
-          ep_script = self.get_script_file_contents(path.join(self.tv_path, tv_show, season, ep))
-          # INSERT command to postgres
+  def import_scripts(self):
+    """Iterate through the files in the given directory and attempt to import them into postgres.
+    """
+    import_file_names = listdir(self.import_files_dir)
+    for import_file_name in import_file_names:
+      logging.info('Processing {import_file_name}'.format(import_file_name=import_file_name))
+      try:
+        with open(import_file_name, 'r', encoding='ISO-8859-1') as import_file:
+          self.cur.copy_from(import_file, self.table_name, sep='\t', columns=('type', 'title', 'season', 'year', 'episode_number', 'episode_title', 'script'))
+      except Exception as e:
+        logging.error('Error occurred importing file ' + import_file_name + ': ' + str(e))
+        self.connect_to_db()  # Reconnect to the database
   
-  def get_year_from_file(self, file_name):
-    year = -1
-    if file_name.find('_') > -1:
-      year_str = file_name.split('_')[-1]
-      if year_str.find('.') > -1:
-        year = int(year_str.split('.')[0])
-      else:
-        year = int(year_str)
-    
-    return year
-  
-  def get_season_from_directory(self, dir_name):
-    season = -1
-    if dir_name.find(' ') > -1:
-      season = int(dir_name.split(' ')[1])
-
-    return season
-  
-  def get_episode_from_file(self, file_name):
-    episode = -1
-    if file_name.find('.') > -1:
-      episode = int(file_name.split('.')[0])
-    
-    return episode
-  
-  def replace_tokens(self, title):
-    fixed_title = (title + '.')[:-1]
-    fixed_title = fixed_title.replace('==BSLASH==', '\\')
-    fixed_title = fixed_title.replace('==SLASH==', '/')
-    fixed_title = fixed_title.replace('==COLON==', ':')
-    fixed_title = fixed_title.replace('==STAR==', '*')
-    fixed_title = fixed_title.replace('==LT==', '<')
-    fixed_title = fixed_title.replace('==GT==', '>')
-    fixed_title = fixed_title.replace('==Q==', '?')
-    fixed_title = fixed_title.replace('==PIPE==', '|')
-
-    return fixed_title
-  
-  def get_script_file_contents(self, file_name):
-    script = None
-    with open(file_name, 'r') as handle:
-      script = handle.read()
-    
-    return script
+  def connect_to_db(self):
+    """Connect to the postgres instance.
+    """
+    logging.info('Connecting to postgres')
+    self.conn = psycopg2.connect(self.conn_str)
+    self.conn.autocommit = True
+    self.cur = self.conn.cursor()
