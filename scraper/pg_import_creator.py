@@ -94,7 +94,7 @@ class PostgressImportCreator():
             show_season_dirs = os.listdir('/'.join([self.tv_dir, letter, show_dir]))
 
             current_show_year = show_year
-            for show_season_dir in show_season_dirs:
+            for show_season_dir in sorted(show_season_dirs):
               try:
                 if os.path.isfile('/'.join([self.tv_dir, letter, show_dir, show_season_dir])):
                   continue
