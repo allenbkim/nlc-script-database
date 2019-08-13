@@ -51,7 +51,7 @@ class PostgressImportCreator():
             with open('/'.join([self.movie_dir, letter, movie_file]), 'r', encoding='ISO-8859-1') as movie_file_contents:
               movie_script = movie_file_contents.read()
             
-            movie_data = '\t'.join([movie_title, movie_year, movie_script]) + '\n'
+            movie_data = '\t'.join(['M', movie_title, movie_year, movie_script]) + '\n'
             self.current_movie_file.write(movie_data)
             movies_per_file_counter += 1
 
@@ -104,7 +104,7 @@ class PostgressImportCreator():
                     with open('/'.join([self.tv_dir, letter, show_dir, show_season_dir, show_season_ep]), 'r', encoding='ISO-8859-1') as ep_contents:
                       show_script = ep_contents.read()
                     
-                    show_data = '\t'.join([show_title, show_year, show_season, current_show_year, ep_number, ep_title, show_script]) + '\n'
+                    show_data = '\t'.join(['T', show_title, show_season, current_show_year, ep_number, ep_title, show_script]) + '\n'
                     self.current_tv_file.write(show_data)
                     tv_per_file_counter += 1
 
