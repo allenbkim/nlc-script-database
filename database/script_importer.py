@@ -46,8 +46,8 @@ class ScriptImporter:
     for import_file_name in import_file_names:
       logging.info('Processing {import_file_name}'.format(import_file_name=import_file_name))
       try:
-        with open(import_file_name, 'r', encoding='ISO-8859-1') as import_file:
-          self.cur.copy_from(import_file, self.table_name, sep='\t', columns=('type', 'title', 'season', 'year', 'episode_number', 'episode_title', 'script'))
+        with open(join(self.import_files_dir, import_file_name), 'r', encoding='ISO-8859-1') as import_file:
+          self.cur.copy_from(import_file, self.table_name, sep='\t', columns=('type', 'title', 'season_text', 'year_text', 'episode_number_text', 'episode_title', 'script'))
       except Exception as e:
         logging.error('Error occurred importing file ' + import_file_name + ': ' + str(e))
         self.connect_to_db()  # Reconnect to the database
