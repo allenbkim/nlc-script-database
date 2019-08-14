@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('script_type', models.CharField(max_length=1)),
                 ('year', models.IntegerField()),
                 ('season', models.IntegerField(null=True)),
-                ('episode', models.IntegerField(null=True)),
+                ('episode', models.TextField(null=True)),
                 ('episode_title', models.TextField(null=True)),
                 ('script_content', models.TextField()),
                 ('search_content', django.contrib.postgres.search.SearchVectorField(null=True)),
