@@ -10,24 +10,32 @@ def search(request):
   if request.method == 'POST':
     # User performed a search
     search_term = request.POST['search_term']
-    results = Script.objects.raw('''SELECT
+
+    search_params = {}
+    search_params['search_term'] = search_term
+    search_params['year_filter_low'] = 2009
+    search_params['year_filter_high'] = 2015
+    results = Script.objects.raw("""SELECT
                                       id,
                                       title,
                                       year,
                                       script_type,
-                                      ts_rank("search_content", to_tsquery('donation')) as "rank",
+                                      season,
+                                      episode,
+                                      ts_rank("search_content", to_tsquery(%(search_term)s)) as "rank",
                                       ts_headline(script_content,
-                                              to_tsquery('donation'),
+                                              to_tsquery(%(search_term)s),
                                               'StartSel=<b>,StopSel=</b>,MaxFragments=10,' ||
                                               'FragmentDelimiter=;#,MaxWords=10,MinWords=1') as "headline"
                                     FROM
                                       search_script
                                     WHERE
-                                      search_content @@ to_tsquery('donation')
-                                      AND year > 2010
+                                      search_content @@ to_tsquery(%(search_term)s)
+                                      AND year >= %(year_filter_low)s
+                                      AND year <= %(year_filter_high)s
                                     ORDER BY rank DESC
                                     LIMIT 1000
-    ''')
+    """, search_params)
 
     if results:
       search_context = {}
@@ -40,6 +48,8 @@ def search(request):
         search_result['id'] = result.id
         search_result['title'] = result.title
         search_result['script_type'] = result.script_type
+        search_result['season'] = result.season
+        search_result['episode'] = result.episode
         search_result['year'] = result.year
         search_result['rank'] = result.rank
         snippets = result.headline.split(';#')

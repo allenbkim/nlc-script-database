@@ -11,16 +11,22 @@
   <span>{{ snippet_hits }} results in {{ script_hits }} scripts</span>
   <table>
     <tr>
-      <th>ID</th>
+      <th><input type="checkbox" name="chk_selectall" /></th>
+      <th>Kind</th>
       <th>Title</th>
       <th>Year</th>
+      <th>Season</th>
+      <th>Episode</th>
       <th>Text</th>
     </tr>
     {% for search_result in search_results %}
     <tr>
-      <td>{{ search_result.id }}</td>
+      <td><input type="checkbox" name="chk_{{search_result.id}}" /></td>
+      <td>{% if search_result.script_type == 'T' %} TV {% else %} Movie {% endif %}</td>
       <td>{{ search_result.title }}</td>
       <td>{{ search_result.year }}</td>
+      <td>{% if search_result.script_type == 'T' %} {{ search_result.season }} {% endif %}</td>
+      <td>{% if search_result.script_type == 'T' %} {{ search_result.episode }} {% endif %}</td>
       <td>
         <table>
           {% autoescape off %}
