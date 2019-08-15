@@ -18,6 +18,7 @@ def search(request):
       search_params['search_term'] = form.cleaned_data['search_terms']
       search_params['year_filter_low'] = form.cleaned_data['year_filter_low'] or 1900
       search_params['year_filter_high'] = form.cleaned_data['year_filter_high'] or 2100
+
       print(search_params)
       results = Script.objects.raw("""SELECT
                                         id,
@@ -41,27 +42,11 @@ def search(request):
                                       LIMIT 1000
       """, search_params)
 
-      if results:
-        search_context['search_results'] = []
-        search_context['script_hits'] = len(results)
-        search_context['snippet_hits'] = 0
+      search_results = create_search_context_from_results(results) 
+      search_context['results'] = search_results
 
-        for result in results:
-          search_result = {}
-          search_result['id'] = result.id
-          search_result['title'] = result.title
-          search_result['script_type'] = result.script_type
-          search_result['season'] = result.season
-          search_result['episode'] = result.episode
-          search_result['year'] = result.year
-          search_result['rank'] = result.rank
-          snippets = result.headline.split(';#')
-          search_result['headline'] = snippets
-          search_context['snippet_hits'] += len(snippets)
-          search_context['search_results'].append(search_result)
-        
-        elapsed = time() - start_time
-        search_context['elapsed'] = '%.4f' % elapsed
+      elapsed = time() - start_time
+      search_context['elapsed'] = '%.4f' % elapsed
   else:
     form = SearchForm()
 
@@ -70,3 +55,28 @@ def search(request):
 
 def view_script(request):
   return render(request, 'search/viewscript.html')
+
+def create_search_context_from_results(results):
+  """Converts SQL query results to dictionary for HTML template.
+  """
+  search_results = {}
+  if results:
+    search_results['search_results'] = []
+    search_results['script_hits'] = len(results)
+    search_results['snippet_hits'] = 0
+
+    for result in results:
+      search_result = {}
+      search_result['id'] = result.id
+      search_result['title'] = result.title
+      search_result['script_type'] = result.script_type
+      search_result['season'] = result.season
+      search_result['episode'] = result.episode
+      search_result['year'] = result.year
+      search_result['rank'] = result.rank
+      snippets = result.headline.split(';#')
+      search_result['headline'] = snippets
+      search_results['snippet_hits'] += len(snippets)
+      search_results['search_results'].append(search_result)
+  
+  return search_results

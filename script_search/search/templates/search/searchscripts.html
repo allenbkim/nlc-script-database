@@ -6,8 +6,8 @@
   <div>
     <button type="submit" value="Search">Search</button>
   </div>
-  {% if search_results %}
-  <span>{{ snippet_hits }} results in {{ script_hits }} scripts in {{ elapsed }} seconds</span>
+  {% if results and results.search_results %}
+  <span>{{ results.snippet_hits }} results in {{ results.script_hits }} scripts in {{ elapsed }} seconds</span>
   <table>
     <tr>
       <th><input type="checkbox" name="chk_selectall" /></th>
@@ -18,7 +18,7 @@
       <th>Episode</th>
       <th>Text</th>
     </tr>
-    {% for search_result in search_results %}
+    {% for search_result in results.search_results %}
     <tr>
       <td><input type="checkbox" name="chk_{{search_result.id}}" /></td>
       <td>{% if search_result.script_type == 'T' %} TV {% else %} Movie {% endif %}</td>
