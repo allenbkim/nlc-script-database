@@ -2,29 +2,10 @@
 
 <form name="form" action="" method="POST">
   {% csrf_token %}
+  {{ form }}
   <div>
-    <div>
-      <div>
-        General terms
-      </div>
-      <div>
-        <input type="text" name="search_term" />
-      </div>
-    </div>
-    <div>
-      <div>
-        Year range
-      </div>
-      <div>
-        <input type="text" name="year_filter_low" /> - 
-        <input type="text" name="year_filter_high" />
-      </div>
-    </div>
-    <div>
-      <button type="submit" value="Search">Search</button>
-    </div>
+    <button type="submit" value="Search">Search</button>
   </div>
-
   {% if search_results %}
   <span>{{ snippet_hits }} results in {{ script_hits }} scripts in {{ elapsed }} seconds</span>
   <table>
