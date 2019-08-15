@@ -30,7 +30,7 @@ def clean_script_title(script_title):
 def remake_script_title(clean_title):
   """Replaces special characters in a TV/movie file name back to the friendly title.
   """
-  script_title = clean_title
+  script_title = clean_title[:]
   script_title = script_title.replace(BACKSLASH, '\\')
   script_title = script_title.replace(SLASH, '/')
   script_title = script_title.replace(COLON, ':')
