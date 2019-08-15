@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import Script
+from time import time
 
 
 def index(request):
@@ -8,13 +9,13 @@ def index(request):
 def search(request):
   search_context = None
   if request.method == 'POST':
-    # User performed a search
-    search_term = request.POST['search_term']
+    start_time = time()
 
+    # User performed a search
     search_params = {}
-    search_params['search_term'] = search_term
-    search_params['year_filter_low'] = 2009
-    search_params['year_filter_high'] = 2015
+    search_params['search_term'] = request.POST['search_term'].strip()
+    search_params['year_filter_low'] = request.POST['year_filter_low'].strip() or 1900
+    search_params['year_filter_high'] = request.POST['year_filter_high'].strip() or 2100
     results = Script.objects.raw("""SELECT
                                       id,
                                       title,
@@ -56,6 +57,9 @@ def search(request):
         search_result['headline'] = snippets
         search_context['snippet_hits'] += len(snippets)
         search_context['search_results'].append(search_result)
+      
+      elapsed = time() - start_time
+      search_context['elapsed'] = '%.4f' % elapsed
 
   return render(request, 'search/searchscripts.html', context=search_context)
 
