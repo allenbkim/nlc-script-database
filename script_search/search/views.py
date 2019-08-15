@@ -15,32 +15,13 @@ def search(request):
     if form.is_valid():
       # User performed a search
       search_params = {}
-      search_params['search_term'] = form.cleaned_data['search_terms']
+      search_params['search_terms'] = form.cleaned_data['search_terms']
       search_params['year_filter_low'] = form.cleaned_data['year_filter_low'] or 1900
       search_params['year_filter_high'] = form.cleaned_data['year_filter_high'] or 2100
+      search_params['script_type'] = form.cleaned_data['script_type']
 
-      print(search_params)
-      results = Script.objects.raw("""SELECT
-                                        id,
-                                        title,
-                                        year,
-                                        script_type,
-                                        season,
-                                        episode,
-                                        ts_rank("search_content", to_tsquery(%(search_term)s)) as "rank",
-                                        ts_headline(script_content,
-                                                to_tsquery(%(search_term)s),
-                                                'StartSel=<b>,StopSel=</b>,MaxFragments=10,' ||
-                                                'FragmentDelimiter=;#,MaxWords=10,MinWords=1') as "headline"
-                                      FROM
-                                        search_script
-                                      WHERE
-                                        search_content @@ to_tsquery(%(search_term)s)
-                                        AND year >= %(year_filter_low)s
-                                        AND year <= %(year_filter_high)s
-                                      ORDER BY rank DESC
-                                      LIMIT 1000
-      """, search_params)
+      query = create_search_query(search_params)
+      results = Script.objects.raw(query, search_params)
 
       search_results = create_search_context_from_results(results) 
       search_context['results'] = search_results
@@ -55,6 +36,37 @@ def search(request):
 
 def view_script(request):
   return render(request, 'search/viewscript.html')
+
+def create_search_query(search_params):
+  query_template = """SELECT
+                        id,
+                        title,
+                        year,
+                        script_type,
+                        season,
+                        episode,
+                        ts_rank("search_content", to_tsquery(%(search_terms)s)) as "rank",
+                        ts_headline(script_content,
+                                to_tsquery(%(search_terms)s),
+                                'StartSel=<b>,StopSel=</b>,MaxFragments=10,' ||
+                                'FragmentDelimiter=;#,MaxWords=10,MinWords=1') as "headline"
+                      FROM
+                        search_script
+                      WHERE
+                        search_content @@ to_tsquery(%(search_terms)s)
+                        AND year >= %(year_filter_low)s
+                        AND year <= %(year_filter_high)s
+                        {script_type_filter}
+                      ORDER BY rank DESC
+                      LIMIT 1000
+  """
+
+  if search_params['script_type'] == 'T' or search_params['script_type'] == 'M':
+    script_type_filter = 'AND script_type=\'{script_type}\''.format(script_type=search_params['script_type'])
+  else:
+    script_type_filter = ''
+  
+  return query_template.format(script_type_filter=script_type_filter)
 
 def create_search_context_from_results(results):
   """Converts SQL query results to dictionary for HTML template.
