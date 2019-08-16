@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import Script
 from .forms import SearchForm
@@ -5,9 +6,14 @@ from time import time
 
 
 def index(request):
+  """Home page of the USC Norman Lear Center. No login required.
+  """
   return render(request, 'search/index.html')
 
+@login_required
 def search(request):
+  """Script search page. Login and search.can_search permission required.
+  """
   search_context = {}
   if request.method == 'POST':
     start_time = time()
@@ -34,7 +40,10 @@ def search(request):
   search_context['form'] = form
   return render(request, 'search/searchscripts.html', context=search_context)
 
+@login_required
 def view_script(request):
+  """View script page. Login and search.can_search permission required.
+  """
   return render(request, 'search/viewscript.html')
 
 def create_search_query(search_params):
