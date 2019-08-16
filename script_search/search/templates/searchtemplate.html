@@ -1,11 +1,18 @@
-This is a header
+<div>
+  <div>
+    This is a header
+  </div>
+  <div>
+    {% if request.user.is_authenticated %}
+    Welcome, {{ request.user.username }}
+    <a href="/logout">Logout</a>
+    {% else %}
+    <a href="/accounts/login?next=/search">Login</a>
+    {% endif %}
+  </div>
+</div>
 
-{% if request.user.is_authenticated %}
-Welcome, {{ request.user.username }}
-<a href="/logout">Logout</a>
-{% else %}
-<a href="/accounts/login?next=/search">Login</a>
-{% endif %}
-
+<div>
 {% block content %}
 {% endblock %}
+</div>
