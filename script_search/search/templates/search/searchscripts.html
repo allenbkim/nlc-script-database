@@ -1,5 +1,24 @@
 {% extends "searchtemplate.html" %}
 
+{% block additional_head %}
+<script type="text/javascript">
+  let all_checked = false;
+  let checkboxes = null;
+
+  function selectAll() {
+    if (!checkboxes) {
+      checkboxes = document.querySelectorAll('input[type=checkbox][name=chk_result]')
+    }
+
+    for (let i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = !all_checked;
+    }
+
+    all_checked = !all_checked
+  }
+</script>
+{% endblock %}
+
 {% block content %}
 <h1>Search Scripts</h1>
 
@@ -16,7 +35,7 @@
   <span>{{ results.snippet_hits }} results in {{ results.script_hits }} scripts in {{ elapsed }} seconds</span>
   <table id="results_table">
     <tr>
-      <th><input type="checkbox" name="chk_selectall" /></th>
+      <th><input type="checkbox" name="chk_selectall" onclick="selectAll();" /></th>
       <th>Kind</th>
       <th>Title</th>
       <th>Year</th>
