@@ -7,11 +7,14 @@
   {% csrf_token %}
   {{ form }}
   <div>
-    <button type="submit" value="Search">Search</button>
+    <button type="submit" name="search">Search</button>
+  </div>
+  <div>
+    <button type="submit" name="export">Export</button>
   </div>
   {% if results and results.search_results %}
   <span>{{ results.snippet_hits }} results in {{ results.script_hits }} scripts in {{ elapsed }} seconds</span>
-  <table>
+  <table id="results_table">
     <tr>
       <th><input type="checkbox" name="chk_selectall" /></th>
       <th>Kind</th>
@@ -23,7 +26,7 @@
     </tr>
     {% for search_result in results.search_results %}
     <tr>
-      <td><input type="checkbox" name="chk_{{search_result.id}}" /></td>
+      <td><input type="checkbox" name="chk_result" value="{{search_result.id}}" /></td>
       <td>{% if search_result.script_type == 'T' %} TV {% else %} Movie {% endif %}</td>
       <td>{{ search_result.title }}</td>
       <td>{{ search_result.year }}</td>

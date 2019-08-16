@@ -1,9 +1,11 @@
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import render
 from .models import Script
 from .forms import SearchForm
 from time import time
+import csv
 
 
 def index(request):
@@ -20,21 +22,39 @@ def search(request):
     start_time = time()
     form = SearchForm(request.POST)
     if form.is_valid():
-      # User performed a search
-      search_params = {}
-      search_params['search_terms'] = form.cleaned_data['search_terms']
-      search_params['year_filter_low'] = form.cleaned_data['year_filter_low'] or 1900
-      search_params['year_filter_high'] = form.cleaned_data['year_filter_high'] or 2100
-      search_params['script_type'] = form.cleaned_data['script_type']
+      if 'search' in form.data:
+        # User performed a search
+        search_params = {}
+        search_params['search_terms'] = form.cleaned_data['search_terms']
+        search_params['year_filter_low'] = form.cleaned_data['year_filter_low'] or 1900
+        search_params['year_filter_high'] = form.cleaned_data['year_filter_high'] or 2100
+        search_params['script_type'] = form.cleaned_data['script_type']
 
-      query = create_search_query(search_params)
-      results = Script.objects.raw(query, search_params)
+        query = create_search_query(search_params)
+        results = Script.objects.raw(query, search_params)
 
-      search_results = create_search_context_from_results(results) 
-      search_context['results'] = search_results
+        search_results = create_search_context_from_results(results) 
+        search_context['results'] = search_results
 
-      elapsed = time() - start_time
-      search_context['elapsed'] = '%.4f' % elapsed
+        elapsed = time() - start_time
+        search_context['elapsed'] = '%.4f' % elapsed
+        request.session['last_results'] = search_results['search_results']
+      elif 'export' in form.data:
+        checked_ids = request.POST.getlist('chk_result')
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=scripts.csv'
+        selected_rows = [row for row in request.session['last_results'] if str(row['id']) in checked_ids]
+        writer = csv.writer(response)
+        for selected_row in selected_rows:
+          writer.writerow([selected_row['script_type'],
+                           selected_row['title'],
+                           selected_row['year'],
+                           selected_row['season'],
+                           selected_row['episode'],
+                           selected_row['headline']
+          ])
+        
+        return response
   else:
     form = SearchForm()
 
