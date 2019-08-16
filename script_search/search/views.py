@@ -1,3 +1,4 @@
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import Script
@@ -45,6 +46,10 @@ def view_script(request):
   """View script page. Login and search.can_search permission required.
   """
   return render(request, 'search/viewscript.html')
+
+def logout_search(request):
+  logout(request)
+  return render(request, 'registration/logout.html')
 
 def create_search_query(search_params):
   query_template = """SELECT

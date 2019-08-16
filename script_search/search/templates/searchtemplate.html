@@ -1,3 +1,11 @@
 This is a header
+
+{% if request.user.is_authenticated %}
+Welcome, {{ request.user.username }}
+<a href="/logout">Logout</a>
+{% else %}
+<a href="/accounts/login?next=/search">Login</a>
+{% endif %}
+
 {% block content %}
 {% endblock %}
