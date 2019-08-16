@@ -1,7 +1,9 @@
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views import generic
 from .models import Script
 from .forms import SearchForm
 from time import time
@@ -61,11 +63,9 @@ def search(request):
   search_context['form'] = form
   return render(request, 'search/searchscripts.html', context=search_context)
 
-@login_required
-def view_script(request):
-  """View script page. Login and search.can_search permission required.
-  """
-  return render(request, 'search/viewscript.html')
+class ScriptDetailView(LoginRequiredMixin, generic.DetailView):
+  model = Script
+  template_name = 'search/viewscript.html'
 
 def logout_search(request):
   logout(request)
