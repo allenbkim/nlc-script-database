@@ -92,7 +92,7 @@ def create_search_query(search_params):
                         AND year <= %(year_filter_high)s
                         {script_type_filter}
                       ORDER BY rank DESC
-                      LIMIT 1000
+                      LIMIT 500
   """
 
   if search_params['script_type'] == 'T' or search_params['script_type'] == 'M':
