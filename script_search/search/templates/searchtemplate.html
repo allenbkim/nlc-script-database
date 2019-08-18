@@ -1,26 +1,30 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en-US">
   <head>
+    <link rel="shortcut icon" href="{% static "ssearch/favicon.png" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "search/scriptsearch.css" %}"></style>
+
     {% block additional_head %}
     {% endblock %}
   </head>
   <body>
-    <div>
+    <div id="main_content">
       <div>
-        This is a header
+        <div>
+          {% if request.user.is_authenticated %}
+          Welcome, {{ request.user.username }}
+          <a href="/logout">Logout</a>
+          {% else %}
+          <a href="/accounts/login?next=/search">Login</a>
+          {% endif %}
+        </div>
+        <img src="{% static "search/usc-logo.png" %}" />
       </div>
       <div>
-        {% if request.user.is_authenticated %}
-        Welcome, {{ request.user.username }}
-        <a href="/logout">Logout</a>
-        {% else %}
-        <a href="/accounts/login?next=/search">Login</a>
-        {% endif %}
+        {% block content %}
+        {% endblock %}
       </div>
-    </div>
-    <div>
-      {% block content %}
-      {% endblock %}
     </div>
   </body>
 </html>
