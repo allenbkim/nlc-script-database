@@ -1,6 +1,80 @@
+header {
+  margin:-8px;
+}
+
+header > div {
+  background-color:#900;
+  height:75px;
+}
+
+header > div > div {
+  margin:0 auto;
+  max-width:1200px;
+}
+
+header .usc-logo {
+  float:left;
+}
+
+header .logout-action {
+  margin:0.6rem 0;
+  float:right
+}
+
+.logo-usc-responsive {
+  margin:0.6rem 0;
+  max-width:20rem;
+  max-height:3.5rem;
+  position:absolute;
+}
+
+.logo-usc-responsive .text-usc-acronym {
+  opacity:1;
+}
+
+.logo-usc-responsive .text-usc-acronym-large {
+  opacity:0;
+}
+
+.logo-usc-responsive .text-usc-acronym, .logo-usc-responsive .text-usc-acronym-large {
+  fill:#fc0;
+}
+
+.logo-usc-responsive .text-usc-full {
+  opacity:1;
+  fill:#fff;
+}
+
+.logo-usc-responsive .icon-shield {
+  fill:#fff;
+}
+
 #main_content {
   margin:0 auto;
-  max-width:1200px
+  max-width:1200px;
+}
+
+#script-search-form {
+  width:100%;
+}
+
+#script-search-form .search-terms {
+  float:left;
+  width:400px;
+}
+
+#script-search-form .script-metadata {
+  float:left;
+}
+
+#script-search-actions {
+  float:left;
+  width:100%;
+}
+
+#script-search-results {
+  float:left;
+  width:100%;
 }
 
 #results_table {

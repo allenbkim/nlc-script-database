@@ -24,49 +24,70 @@
 
 <form name="form" action="" method="POST">
   {% csrf_token %}
-  {{ form }}
-  <div>
-    <button type="submit" name="search">Search</button>
+  <div id="script-search-form">
+    <div class="search-terms">
+    {{ form.search_terms.errors }}
+      <label for="{{form.search_terms.id_for_label}}">Script search terms:</label>
+    {{ form.search_terms }}
+    </div>
+    <div class="script-metadata">
+      <div>
+      {{ form.year_filter_low.errors }}
+        <label for="{{form.year_filter_low.id_for_label}}">From:</label>
+      {{ form.year_filter_low }}
+      {{ form.year_filter_high.errors }}
+        <label for="{{form.year_filter_high.id_for_label}}">To:</label>
+      {{ form.year_filter_high }}
+      </div>
+      <div>
+      {{ form.script_type.errors }}
+        <label for="{{form.script_type.id_for_label}}">Script type:</label>
+      {{ form.script_type }}
+      </div>
+    </div>
   </div>
-  <div>
+  <div id="script-search-actions">
+    <button type="submit" name="search">Search</button>
     <button type="submit" name="export">Export</button>
   </div>
   {% if results and results.search_results %}
-  <span>{{ results.snippet_hits }} results in {{ results.script_hits }} scripts in {{ elapsed }} seconds</span>
-  <table id="results_table">
-    <tr>
-      <th><input type="checkbox" name="chk_selectall" onclick="selectAll();" /></th>
-      <th>Kind</th>
-      <th>Title</th>
-      <th>Year</th>
-      <th>Season</th>
-      <th>Episode</th>
-      <th>Text</th>
-    </tr>
-    {% for search_result in results.search_results %}
-    <tr>
-      <td><input type="checkbox" name="chk_result" value="{{search_result.id}}" /></td>
-      <td>{% if search_result.script_type == 'T' %} TV {% else %} Movie {% endif %}</td>
-      <td>{{ search_result.title }}</td>
-      <td>{{ search_result.year }}</td>
-      <td>{% if search_result.script_type == 'T' %} {{ search_result.season }} {% endif %}</td>
-      <td>{% if search_result.script_type == 'T' %} {{ search_result.episode }} {% endif %}</td>
-      <td>
-        <table>
-          {% autoescape off %}
-          {% for snippet in search_result.headline %}
-            <tr>
-              <td>
-                {{ snippet }}
-              </td>
-            </tr>
-          {% endfor %}
-          {% endautoescape %}
-        </table>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
+  <div id="script-search-results">
+    <span>{{ results.snippet_hits }} results in {{ results.script_hits }} scripts in {{ elapsed }} seconds</span>
+    <table id="results_table">
+      <tr>
+        <th><input type="checkbox" name="chk_selectall" onclick="selectAll();" /></th>
+        <th>Kind</th>
+        <th>Title</th>
+        <th>Year</th>
+        <th>Season</th>
+        <th>Episode</th>
+        <th>Text</th>
+      </tr>
+      {% for search_result in results.search_results %}
+      <tr>
+        <td><input type="checkbox" name="chk_result" value="{{search_result.id}}" /></td>
+        <td>{% if search_result.script_type == 'T' %} TV {% else %} Movie {% endif %}</td>
+        <td>{{ search_result.title }}</td>
+        <td>{{ search_result.year }}</td>
+        <td>{% if search_result.script_type == 'T' %} {{ search_result.season }} {% endif %}</td>
+        <td>{% if search_result.script_type == 'T' %} {{ search_result.episode }} {% endif %}</td>
+        <td>
+          <table>
+            {% autoescape off %}
+            {% for snippet in search_result.headline %}
+              <tr>
+                <td>
+                  {{ snippet }}
+                </td>
+              </tr>
+            {% endfor %}
+            {% endautoescape %}
+          </table>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
   {% endif %}
 </form>
 
