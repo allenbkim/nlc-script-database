@@ -56,7 +56,7 @@
     <table id="results_table">
       <tr>
         <th><input type="checkbox" name="chk_selectall" onclick="selectAll();" /></th>
-        <th>Kind</th>
+        <th>Type</th>
         <th>Title</th>
         <th>Year</th>
         <th>Season</th>
@@ -67,7 +67,7 @@
       <tr>
         <td><input type="checkbox" name="chk_result" value="{{search_result.id}}" /></td>
         <td>{% if search_result.script_type == 'T' %} TV {% else %} Movie {% endif %}</td>
-        <td>{{ search_result.title }}</td>
+        <td><a href="/search/{{search_result.id}}/" target="_blank">{{ search_result.title }}</a></td>
         <td>{{ search_result.year }}</td>
         <td>{% if search_result.script_type == 'T' %} {{ search_result.season }} {% endif %}</td>
         <td>{% if search_result.script_type == 'T' %} {{ search_result.episode }} {% endif %}</td>
