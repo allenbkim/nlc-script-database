@@ -40,7 +40,12 @@ def search(request):
 
         elapsed = time() - start_time
         search_context['elapsed'] = '%.4f' % elapsed
-        request.session['last_results'] = search_results['search_results']
+
+        # Cache the last results for export
+        if 'search_results' in search_results:
+          request.session['last_results'] = search_results['search_results']
+        else:
+          request.session['last_results'] = None
       elif 'export' in form.data:
         checked_ids = request.POST.getlist('chk_result')
         response = HttpResponse(content_type='text/csv')
