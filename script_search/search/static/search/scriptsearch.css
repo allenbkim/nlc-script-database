@@ -1,9 +1,23 @@
 #main_content {
-  margin: 0 auto;
+  margin:0 auto;
   max-width:1200px
 }
 
 #results_table {
-  border: 1px black solid;
-  width:100%
+  border:1px black solid;
+  width:100%;
+  border-collapse:collapse;
+  text-align:left
+}
+
+#results_table tbody tr, #results_table tbody tr th, #results_table tbody tr td {
+  border:1px black solid;
+  vertical-align:top;
+  padding:5px
+}
+
+#results_table table tbody tr td {
+  border:none;
+  border-collapse:collapse;
+  width:100%;
 }
