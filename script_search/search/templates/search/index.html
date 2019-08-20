@@ -1,7 +1,9 @@
 {% extends "searchtemplate.html" %}
 
 {% block content %}
-<h1>Welcome to the USC Norman Lear Center Script Searcher!</h1>
-<h2>Find what you need</h2>
-<a href="/search/searchscripts">Search the Script Database</a>
+
+{% load static %}
+<img src="{% static "search/nlc.png" %}" />
+<h1>Norman Lear Center Script Database</h1>
+<a href="/search/searchscripts">Search the Database</a>
 {% endblock %}

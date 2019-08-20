@@ -20,29 +20,44 @@
 {% endblock %}
 
 {% block content %}
-<h1>Search Scripts</h1>
+<h1>Norman Lear Center Script Database</h1>
 
 <form name="form" action="" method="POST">
   {% csrf_token %}
   <div id="script-search-form">
     <div class="search-terms">
-    {{ form.search_terms.errors }}
-      <label for="{{form.search_terms.id_for_label}}">Script search terms:</label>
-    {{ form.search_terms }}
+      <div id="search-terms-errors">
+        {{ form.search_terms.errors }}
+      </div>
+      <div id="search-terms-label">
+        <label for="{{form.search_terms.id_for_label}}">Script search terms:</label>
+      </div>
+      <div id="search-terms-text">
+        {{ form.search_terms }}
+      </div>
     </div>
-    <div class="script-metadata">
-      <div>
+    <div class="script-years">
+      <div id="script-year-errors">
       {{ form.year_filter_low.errors }}
-        <label for="{{form.year_filter_low.id_for_label}}">From:</label>
-      {{ form.year_filter_low }}
       {{ form.year_filter_high.errors }}
-        <label for="{{form.year_filter_high.id_for_label}}">To:</label>
-      {{ form.year_filter_high }}
+      </div>
+      <div id="script-year-label">
+        <span>Script date range:</span>
       </div>
       <div>
-      {{ form.script_type.errors }}
+        {{ form.year_filter_low }} - 
+        {{ form.year_filter_high }}
+      </div>
+    </div>
+    <div class="script-type">
+      <div id="script-type-errors">
+        {{ form.script_type.errors }}
+      </div>
+      <div id="script-type-label">
         <label for="{{form.script_type.id_for_label}}">Script type:</label>
-      {{ form.script_type }}
+      </div>
+      <div id="script-type-radio">
+        {{ form.script_type }}
       </div>
     </div>
   </div>
