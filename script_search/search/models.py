@@ -31,6 +31,7 @@ class Script(models.Model):
 
   class Meta:
       indexes = [BTreeIndex(fields=["year"]), BTreeIndex(fields=["script_type"]), GinIndex(fields=["search_content"])]
+      ordering = ['title']
 
 
 def format_script_title(script_obj):
