@@ -63,7 +63,7 @@ def search(request):
         
         return response
   else:
-    form = SearchForm()
+    form = SearchForm(initial={'script_type': 'All'})
 
   search_context['form'] = form
   return render(request, 'search/searchscripts.html', context=search_context)
