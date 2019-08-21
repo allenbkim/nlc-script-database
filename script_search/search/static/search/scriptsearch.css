@@ -53,6 +53,14 @@ header .logout-action {
   fill:#fff;
 }
 
+.logout-action {
+  color:#fff;
+}
+
+.logout-action a {
+  color:#fff;
+}
+
 #login_form {
   width:250px;
   margin:0 auto;

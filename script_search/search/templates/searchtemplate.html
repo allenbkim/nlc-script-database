@@ -19,7 +19,7 @@
           </div>
           <div class="logout-action">
             {% if request.user.is_authenticated %}
-            Welcome, {{ request.user.username }}
+            Welcome, {{ request.user.username }}!
             <a href="/logout">Logout</a>
             {% else %}
             <a href="/accounts/login?next=/search">Login</a>
