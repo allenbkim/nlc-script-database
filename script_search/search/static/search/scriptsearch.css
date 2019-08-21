@@ -53,6 +53,11 @@ header .logout-action {
   fill:#fff;
 }
 
+#login_form {
+  width:250px;
+  margin:0 auto;
+}
+
 #main_content {
   margin:0 auto;
   max-width:1200px;
