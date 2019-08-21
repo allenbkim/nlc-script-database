@@ -52,18 +52,19 @@ def search(request):
         response['Content-Disposition'] = 'attachment; filename=scripts.csv'
         selected_rows = [row for row in request.session['last_results'] if str(row['id']) in checked_ids]
         writer = csv.writer(response)
+        writer.writerow(['Script Type', 'Title', 'Year', 'Season', 'Episode', 'Mentions'])
         for selected_row in selected_rows:
-          writer.writerow([selected_row['script_type'],
+          writer.writerow(['TV' if selected_row['script_type'] == 'T' else 'Movie',
                            selected_row['title'],
                            selected_row['year'],
-                           selected_row['season'],
-                           selected_row['episode'],
-                           selected_row['headline']
+                           selected_row['season'] if selected_row['script_type'] == 'T' else '',
+                           selected_row['episode'] if selected_row['script_type'] == 'T' else '',
+                           clean_mentions_for_export(selected_row['headline'])
           ])
         
         return response
   else:
-    form = SearchForm(initial={'script_type': 'All'})
+    form = SearchForm(initial={'script_type': 'T'})
 
   search_context['form'] = form
   return render(request, 'search/searchscripts.html', context=search_context)
@@ -131,3 +132,12 @@ def create_search_context_from_results(results):
       search_results['search_results'].append(search_result)
   
   return search_results
+
+def clean_mentions_for_export(mentions):
+  cleaned_mentions = ''
+
+  for mention in mentions:
+    cleaned_mentions += mention.replace('<b>', '').replace('</b>', '')
+    cleaned_mentions += ';#'
+
+  return cleaned_mentions
