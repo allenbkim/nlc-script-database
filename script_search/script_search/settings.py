@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'bw*s8)ah_@#^=%%07fy14(h3!am5$t4ih!*576+=@ou+x*mxc-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -77,18 +77,30 @@ WSGI_APPLICATION = 'script_search.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        'OPTIONS': {'connect_timeout': 2},
-    }
-}
-
+if 'RDS_DB_NAME' in os.environ:
+  DATABASES = {
+      'default': {
+          'ENGINE': 'django.db.backends.postgresql',
+          'NAME': os.environ['RDS_DB_NAME'],
+          'USER': os.environ['RDS_USERNAME'],
+          'PASSWORD': os.environ['RDS_PASSWORD'],
+          'HOST': os.environ['RDS_HOSTNAME'],
+          'PORT': os.environ['RDS_PORT'],
+          'OPTIONS': {'connect_timeout': 2},
+      }
+  }
+else:
+  DATABASES = {
+      'default': {
+          'ENGINE': 'django.db.backends.postgresql',
+          'NAME': '',
+          'USER': '',
+          'PASSWORD': '',
+          'HOST': '',
+          'PORT': '',
+          'OPTIONS': {'connect_timeout': 2},
+      }
+  }
 
 LOGIN_URL = '/accounts/login/'
 
@@ -128,5 +140,5 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
+STATIC_ROOT = os.path.join(BASE_DIR, '..', 'www', 'static')
 STATIC_URL = '/static/'
