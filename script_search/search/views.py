@@ -85,15 +85,15 @@ def create_search_query(search_params):
                         script_type,
                         season,
                         episode,
-                        ts_rank("search_content", to_tsquery(%(search_terms)s)) as "rank",
-                        ts_headline(script_content,
-                                to_tsquery(%(search_terms)s),
+                        ts_rank("search_content", to_tsquery('english', %(search_terms)s)) as "rank",
+                        ts_headline('english', script_content,
+                                to_tsquery('english', %(search_terms)s),
                                 'StartSel=<b>,StopSel=</b>,MaxFragments=10,' ||
-                                'FragmentDelimiter=;#,MaxWords=10,MinWords=1') as "headline"
+                                'FragmentDelimiter=;#,MaxWords=10,MinWords=5') as "headline"
                       FROM
                         search_script
                       WHERE
-                        search_content @@ to_tsquery(%(search_terms)s)
+                        search_content @@ to_tsquery('english', %(search_terms)s)
                         AND year >= %(year_filter_low)s
                         AND year <= %(year_filter_high)s
                         {script_type_filter}
