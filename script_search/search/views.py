@@ -3,6 +3,7 @@ from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import Error
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -24,48 +25,55 @@ def search(request):
   """
   search_context = {}
   if request.method == 'POST':
-    start_time = time()
-    form = SearchForm(request.POST)
-    if form.is_valid():
-      if 'search' in form.data:
-        # User performed a search
-        search_params = {}
-        search_params['search_terms'] = form.cleaned_data['search_terms']
-        search_params['year_filter_low'] = form.cleaned_data['year_filter_low'] or 1900
-        search_params['year_filter_high'] = form.cleaned_data['year_filter_high'] or 2100
-        search_params['script_type'] = form.cleaned_data['script_type']
+    try:
+      start_time = time()
+      form = SearchForm(request.POST)
+      if form.is_valid():
+        if 'search' in form.data:
+          # User performed a search
+          search_params = {}
+          search_params['search_terms'] = form.cleaned_data['search_terms']
+          search_params['year_filter_low'] = form.cleaned_data['year_filter_low'] or 1900
+          search_params['year_filter_high'] = form.cleaned_data['year_filter_high'] or 2100
+          search_params['script_type'] = form.cleaned_data['script_type']
 
-        query = create_search_query(search_params)
-        results = Script.objects.raw(query, search_params)
+          query = create_search_query(search_params)
+          results = Script.objects.raw(query, search_params)
 
-        search_results = create_search_context_from_results(results) 
-        search_context['results'] = search_results
+          search_results = create_search_context_from_results(results) 
+          search_context['results'] = search_results
 
-        elapsed = time() - start_time
-        search_context['elapsed'] = '%.4f' % elapsed
+          elapsed = time() - start_time
+          search_context['elapsed'] = '%.4f' % elapsed
 
-        # Cache the last results for export
-        if 'search_results' in search_results:
-          request.session['last_results'] = search_results['search_results']
-        else:
-          request.session['last_results'] = None
-      elif 'export' in form.data:
-        checked_ids = request.POST.getlist('chk_result')
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=scripts.csv'
-        selected_rows = [row for row in request.session['last_results'] if str(row['id']) in checked_ids]
-        writer = csv.writer(response)
-        writer.writerow(['Script Type', 'Title', 'Year', 'Season', 'Episode', 'Mentions'])
-        for selected_row in selected_rows:
-          writer.writerow(['TV' if selected_row['script_type'] == 'T' else 'Movie',
-                           selected_row['title'],
-                           selected_row['year'],
-                           selected_row['season'] if selected_row['script_type'] == 'T' else '',
-                           selected_row['episode'] if selected_row['script_type'] == 'T' else '',
-                           clean_mentions_for_export(selected_row['headline'])
-          ])
-        
-        return response
+          # Cache the last results for export
+          if 'search_results' in search_results:
+            request.session['last_results'] = search_results['search_results']
+          else:
+            request.session['last_results'] = None
+        elif 'export' in form.data:
+          checked_ids = request.POST.getlist('chk_result')
+          response = HttpResponse(content_type='text/csv')
+          response['Content-Disposition'] = 'attachment; filename=scripts.csv'
+          selected_rows = [row for row in request.session['last_results'] if str(row['id']) in checked_ids]
+          writer = csv.writer(response)
+          writer.writerow(['Script Type', 'Title', 'Year', 'Season', 'Episode', 'Mentions'])
+          for selected_row in selected_rows:
+            writer.writerow(['TV' if selected_row['script_type'] == 'T' else 'Movie',
+                            selected_row['title'],
+                            selected_row['year'],
+                            selected_row['season'] if selected_row['script_type'] == 'T' else '',
+                            selected_row['episode'] if selected_row['script_type'] == 'T' else '',
+                            clean_mentions_for_export(selected_row['headline'])
+            ])
+          
+          return response
+    except Error:
+      print('here')
+      search_context['errors'] = 'There was an error with the search. Please check your search query and try again.'
+    except Exception:
+      print('now')
+      search_context['errors'] = 'An error occurred. Please try again later.'
   else:
     form = SearchForm(initial={'script_type': 'T'})
 

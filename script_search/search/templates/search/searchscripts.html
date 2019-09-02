@@ -26,8 +26,8 @@
   {% csrf_token %}
   <div id="script-search-form">
     <div class="search-terms">
-      <div id="search-terms-errors">
-        {{ form.search_terms.errors }}
+      <div id="search-terms-errors" class="error-message">
+        {{ errors }}
       </div>
       <div id="search-terms-label">
         <label for="{{form.search_terms.id_for_label}}">Script search terms:</label>
