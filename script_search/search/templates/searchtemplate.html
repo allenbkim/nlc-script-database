@@ -19,8 +19,13 @@
           </div>
           <div class="logout-action">
             {% if request.user.is_authenticated %}
-            Welcome, {{ request.user.username }}!
-            <a href="/logout">Logout</a>
+            <div>
+              Welcome, {{ request.user.username }}!
+              <a href="/logout">Logout</a>
+            </div>
+            <div>
+              <a href="/changepassword">Change Password</a>
+            </div>
             {% else %}
             <a href="/accounts/login?next=/search">Login</a>
             {% endif %}

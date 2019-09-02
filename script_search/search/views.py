@@ -1,6 +1,9 @@
-from django.contrib.auth import logout
+from django.contrib import messages
+from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import generic
@@ -73,10 +76,29 @@ class ScriptDetailView(LoginRequiredMixin, generic.DetailView):
   model = Script
   template_name = 'search/viewscript.html'
 
+@login_required
 def logout_search(request):
   logout(request)
   return render(request, 'registration/logout.html')
 
+@login_required
+def change_password(request):
+  if request.method == 'POST':
+    form = PasswordChangeForm(request.user, request.POST)
+    if form.is_valid():
+      user = form.save()
+      update_session_auth_hash(request, user)  # Keeps the user logged in
+      messages.success(request, 'Your password was successfully updated!')
+      return redirect('search:changepassword')
+    else:
+      messages.error(request, 'Please correct the error below.')
+  else:
+    form = PasswordChangeForm(request.user)
+  return render(request, 'registration/changepassword.html', {
+    'form': form
+  })
+
+@login_required
 def search_query_help(request):
   return render(request, 'search/queryhelp.html')
 

@@ -66,6 +66,15 @@ header .logout-action {
   margin:0 auto;
 }
 
+#password_form {
+  width:100%;
+  margin:0 auto;
+}
+
+#password_form table {
+  margin:0 auto;
+}
+
 #main_content {
   margin:0 auto;
   max-width:1000px;
