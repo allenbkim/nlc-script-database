@@ -9,4 +9,5 @@ urlpatterns = [
   path('searchscripts/', views.search, name='searchscripts'),
   path('<int:pk>/', views.ScriptDetailView.as_view(), name='detail'),
   path('logout/', views.logout_search, name='logout'),
+  path('help/', views.search_query_help, name='help'),
 ]

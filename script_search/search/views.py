@@ -77,6 +77,9 @@ def logout_search(request):
   logout(request)
   return render(request, 'registration/logout.html')
 
+def search_query_help(request):
+  return render(request, 'search/queryhelp.html')
+
 def create_search_query(search_params):
   query_template = """SELECT
                         id,
