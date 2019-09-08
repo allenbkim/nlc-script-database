@@ -57,13 +57,14 @@ def search(request):
           response['Content-Disposition'] = 'attachment; filename=scripts.csv'
           selected_rows = [row for row in request.session['last_results'] if str(row['id']) in checked_ids]
           writer = csv.writer(response)
-          writer.writerow(['Script Type', 'Title', 'Year', 'Season', 'Episode', 'Mentions'])
+          writer.writerow(['Script Type', 'Title', 'Year', 'Season', 'Episode', 'URL', 'Mentions'])
           for selected_row in selected_rows:
             writer.writerow(['TV' if selected_row['script_type'] == 'T' else 'Movie',
                             selected_row['title'],
                             selected_row['year'],
                             selected_row['season'] if selected_row['script_type'] == 'T' else '',
                             selected_row['episode'] if selected_row['script_type'] == 'T' else '',
+                            request.build_absolute_uri('/search/{id}'.format(id=selected_row['id'])),
                             clean_mentions_for_export(selected_row['headline'])
             ])
           
