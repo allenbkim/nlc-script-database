@@ -73,7 +73,7 @@ def search(request):
     except Exception:
       search_context['errors'] = 'An error occurred. Please try again later.'
   else:
-    form = SearchForm(initial={'script_type': 'T'})
+    form = SearchForm(initial={'script_type': 'All'})
 
   search_context['form'] = form
   return render(request, 'search/searchscripts.html', context=search_context)
