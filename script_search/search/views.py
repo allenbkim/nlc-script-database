@@ -12,6 +12,7 @@ from .models import Script
 from .forms import SearchForm
 from time import time
 import csv
+from re import compile, sub
 
 
 def index(request):
@@ -32,7 +33,7 @@ def search(request):
         if 'search' in form.data:
           # User performed a search
           search_params = {}
-          search_params['search_terms'] = form.cleaned_data['search_terms']
+          search_params['search_terms'] = create_search_terms_query(form.cleaned_data['search_terms'].strip())
           search_params['year_filter_low'] = form.cleaned_data['year_filter_low'] or 1900
           search_params['year_filter_high'] = form.cleaned_data['year_filter_high'] or 2100
           search_params['script_type'] = form.cleaned_data['script_type']
@@ -108,6 +109,19 @@ def change_password(request):
 @login_required
 def search_query_help(request):
   return render(request, 'search/queryhelp.html')
+
+def create_search_terms_query(search_terms):
+  whitespace_pattern = compile('\s+')
+  clean_search_terms = whitespace_pattern.sub(' ', search_terms)
+  single_terms = clean_search_terms.split(' ')
+
+  if '&' not in single_terms and \
+      '|' not in single_terms and \
+      '<' not in single_terms and \
+      len(single_terms) > 1:
+    return ' | '.join(single_terms)
+  else:
+    return search_terms
 
 def create_search_query(search_params):
   query_template = """SELECT
