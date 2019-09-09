@@ -3,7 +3,7 @@ from django import forms
 
 class SearchForm(forms.Form):
   year_choices = [('', '')]
-  year_choices += [(x, x) for x in range(1920, 2021)]
+  year_choices += [(x, x) for x in reversed(range(1920, 2021))]
 
   script_type_choices = [('All', 'All'), ('T', 'TV'), ('M', 'Movie')]
 
