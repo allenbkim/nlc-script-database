@@ -58,7 +58,7 @@ def search(request):
           response['Content-Disposition'] = 'attachment; filename=scripts.csv'
           selected_rows = [row for row in request.session['last_results'] if str(row['id']) in checked_ids]
           writer = csv.writer(response)
-          writer.writerow(['Script Type', 'Title', 'Year', 'Season', 'Episode', 'URL', 'Mentions'])
+          writer.writerow(['Script Type', 'Title', 'Year', 'Season', 'Episode', 'URL', 'Mentions', 'Mentions_flat'])
           for selected_row in selected_rows:
             writer.writerow(['TV' if selected_row['script_type'] == 'T' else 'Movie',
                             selected_row['title'],
@@ -66,6 +66,7 @@ def search(request):
                             selected_row['season'] if selected_row['script_type'] == 'T' else '',
                             selected_row['episode'] if selected_row['script_type'] == 'T' else '',
                             request.build_absolute_uri('/search/{id}'.format(id=selected_row['id'])),
+                            clean_cr_mentions_for_export(selected_row['headline']),
                             clean_mentions_for_export(selected_row['headline'])
             ])
           
@@ -180,10 +181,20 @@ def create_search_context_from_results(results):
   return search_results
 
 def clean_mentions_for_export(mentions):
-  cleaned_mentions = ''
-
-  for mention in mentions:
-    cleaned_mentions += mention.replace('<b>', '').replace('</b>', '')
-    cleaned_mentions += ';#'
+  cleaned_mentions = ';#'.join(mentions)
+  cleaned_mentions = cleaned_mentions.replace('<b>', '').replace('</b>', '')
 
   return cleaned_mentions
+
+def clean_cr_mentions_for_export(mentions):
+  """Formats mentions with carriage returns for Google Sheets.
+  """
+  quoted_mentions = []
+  for mention in mentions:
+    quoted_mentions.append('{q}{m}{q}'.format(q='"', m=mention.replace('"', '\'')))
+  cleaned_cr_mentions = ', CHAR(10), CHAR(10), '.join(quoted_mentions)
+  cleaned_cr_mentions = cleaned_cr_mentions
+  cleaned_cr_mentions = '=CONCATENATE(' + cleaned_cr_mentions + ')'
+
+  return cleaned_cr_mentions
+
