@@ -191,7 +191,10 @@ def clean_cr_mentions_for_export(mentions):
   """
   quoted_mentions = []
   for mention in mentions:
-    quoted_mentions.append('{q}{m}{q}'.format(q='"', m=mention.replace('"', '\'')))
+    quoted_mentions.append('{q}{m}{q}'.format(q='"', 
+                                              m=mention.replace('"', '\'').replace('<b>', '').replace('</b>', '')
+                                             )
+                          )
   cleaned_cr_mentions = ', CHAR(10), CHAR(10), '.join(quoted_mentions)
   cleaned_cr_mentions = cleaned_cr_mentions
   cleaned_cr_mentions = '=CONCATENATE(' + cleaned_cr_mentions + ')'
