@@ -1,0 +1,112 @@
+{% extends "searchtemplate.html" %}
+
+{% block additional_head %}
+<script type="text/javascript">
+  let all_checked = false;
+  let checkboxes = null;
+
+  function selectAll() {
+    if (!checkboxes) {
+      checkboxes = document.querySelectorAll('input[type=checkbox][name=chk_result]')
+    }
+
+    for (let i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = !all_checked;
+    }
+
+    all_checked = !all_checked
+  }
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>Norman Lear Center Script Database</h1>
+
+<form name="form" action="" method="POST">
+  {% csrf_token %}
+  <div id="script-search-form">
+    <div class="search-terms">
+      <div id="search-terms-errors" class="error-message">
+        {{ errors }}
+      </div>
+      <div id="search-terms-label">
+        <label for="{{form.search_terms.id_for_label}}">Script search terms:</label>
+      </div>
+      <div>
+        <span><a href="/search/help" target="_blank">Need help?</a></span>
+      </div>
+      <div id="search-terms-text">
+        {{ form.search_terms }}
+      </div>
+    </div>
+    <div class="script-years">
+      <div id="script-year-errors">
+      {{ form.year_filter_low.errors }}
+      {{ form.year_filter_high.errors }}
+      </div>
+      <div id="script-year-label">
+        <span>Script date range:</span>
+      </div>
+      <div>
+        {{ form.year_filter_low }} - 
+        {{ form.year_filter_high }}
+      </div>
+    </div>
+    <div class="script-type">
+      <div id="script-type-errors">
+        {{ form.script_type.errors }}
+      </div>
+      <div id="script-type-label">
+        <label for="{{form.script_type.id_for_label}}">Script type:</label>
+      </div>
+      <div id="script-type-radio">
+        {{ form.script_type }}
+      </div>
+    </div>
+  </div>
+  <div id="script-search-actions">
+    <button type="submit" name="search">Search</button>
+    <button type="submit" name="export">Export</button>
+  </div>
+  {% if results and results.search_results %}
+  <div id="script-search-results">
+    <span>{{ results.snippet_hits }} results in {{ results.script_hits }} scripts in {{ elapsed }} seconds</span>
+    <table id="results_table">
+      <tr>
+        <th><input type="checkbox" name="chk_selectall" onclick="selectAll();" /></th>
+        <th>Type</th>
+        <th>Title</th>
+        <th>Year</th>
+        <th>Season</th>
+        <th>Episode</th>
+        <th>Text</th>
+      </tr>
+      {% for search_result in results.search_results %}
+      <tr>
+        <td><input type="checkbox" name="chk_result" value="{{search_result.id}}" /></td>
+        <td>{% if search_result.script_type == 'T' %} TV {% else %} Movie {% endif %}</td>
+        <td><a href="/search/{{search_result.id}}/" target="_blank">{{ search_result.title }}</a></td>
+        <td>{{ search_result.year }}</td>
+        <td>{% if search_result.script_type == 'T' %} {{ search_result.season }} {% endif %}</td>
+        <td>{% if search_result.script_type == 'T' %} {{ search_result.episode }} {% endif %}</td>
+        <td>
+          <table>
+            {% autoescape off %}
+            {% for snippet in search_result.headline %}
+              <tr>
+                <td>
+                  {{ snippet }}
+                </td>
+              </tr>
+            {% endfor %}
+            {% endautoescape %}
+          </table>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</form>
+
+{% endblock %}
