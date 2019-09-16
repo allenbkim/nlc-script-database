@@ -1,5 +1,8 @@
 # Python
 __pycache__/
+lib/
+bin/
+pyvenv.cfg
 
 # Mac OS
 .DS_Store
