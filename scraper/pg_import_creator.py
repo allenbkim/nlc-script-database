@@ -93,13 +93,16 @@ class PostgressImportCreator():
             show_title, show_year = self.extract_tv_title_and_year_from_dir(show_dir)
             show_season_dirs = os.listdir('/'.join([self.tv_dir, letter, show_dir]))
 
-            current_show_year = show_year
             for show_season_dir in sorted(show_season_dirs):
               try:
                 if os.path.isfile('/'.join([self.tv_dir, letter, show_dir, show_season_dir])):
                   continue
       
                 show_season = show_season_dir.split(' ')[1]
+
+                # Calculate current season's year. E.g., if show_year is 1995,
+                # then season 4's year is 1995 + 4 - 1 = 1998
+                current_show_year = str(int(show_year) + int(show_season) - 1)
                 show_season_eps = os.listdir('/'.join([self.tv_dir, letter, show_dir, show_season_dir]))
                 for show_season_ep in show_season_eps:
                   try:
@@ -120,8 +123,6 @@ class PostgressImportCreator():
                       tv_per_file_counter = 0
                   except Exception as e:
                     logging.error('create_tv_import_files() - episode loop: Error occurred while processing TV show ' + show_title + ', season ' + show_season + ', episode ' + show_season_ep + ': ' + str(e))
-
-                current_show_year = str(int(current_show_year) + 1)
               except Exception as e:
                 logging.error('create_tv_import_files() - season loop: Error occurred while processing TV show ' + show_title + ', season ' + show_season_dir + ': ' + str(e))
           except Exception as e:
